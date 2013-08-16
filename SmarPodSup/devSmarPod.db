@@ -1,0 +1,577 @@
+record(bo, "$(P)$(R)CMD:INIT") {
+    field(DESC, "(setup EOL and number format)")
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto initialize_smarpod($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+    field(FLNK, "$(P)$(R)CMD:ALL_STATUS")
+}
+
+record(fanout, "$(P)$(R)CMD:ALL_STATUS") {
+    field(LNK1, "$(P)$(R)UNIT")
+    field(LNK2, "$(P)$(R)CMD:READ_VER")
+    field(LNK3, "$(P)$(R)CMD:READ_STATUS")
+}
+
+# Controlling unit number
+record(ao, "$(P)$(R)CMD:UNIT") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto set_int($(P)$(R),\\%unit) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(FLNK, "$(P)$(R)UNIT")
+}
+
+record(ai, "$(P)$(R)UNIT")
+{
+    field(DESC, "Selected SmarPod unit")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_int($(P)$(R),\\%unit) $(PORT) $(A)")
+    field(SCAN, "Passive")
+}
+
+# Reference
+record(bo, "$(P)$(R)CMD:REF") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto reference($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(ZNAM, "Reference")
+    field(ONAM, "Reference")
+}
+
+record(bi, "$(P)$(R)REF")
+{
+    field(DESC, "Readback referenced state")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_int($(P)$(R),ref) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "1 second")
+    field(ZNAM, "Unreferenced")
+    field(ONAM, "Referenced")
+}
+
+record(ai, "$(P)$(R)_REF")
+{
+    field(DESC, "Async reference response")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto async_ref_response($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "I/O Intr")
+    field(TPRO, 1)
+}
+
+# Positions - Move
+record(bo, "$(P)$(R)CMD:MOVE")
+{
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto move_mm($(P)$(R)) $(PORT) $(A)")
+}
+
+record(ao, "$(P)$(R)CMD:X")
+{
+    field(PREC, "6")
+    field(EGU, "mm")
+}
+
+record(ao, "$(P)$(R)CMD:Y")
+{
+    field(PREC, "6")
+    field(EGU, "mm")
+}
+
+record(ao, "$(P)$(R)CMD:Z")
+{
+    field(PREC, "6")
+    field(EGU, "mm")
+}
+
+record(ao, "$(P)$(R)CMD:RX")
+{
+    field(PREC, "6")
+    field(EGU, "deg")
+}
+
+record(ao, "$(P)$(R)CMD:RY")
+{
+    field(PREC, "6")
+    field(EGU, "deg")
+}
+
+record(ao, "$(P)$(R)CMD:RZ")
+{
+    field(PREC, "6")
+    field(EGU, "deg")
+}
+
+# Stop
+record(bo, "$(P)$(R)CMD:STOP")
+{
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto simple_cmd($(P)$(R),stop) $(PORT) $(A)")
+    field(ZNAM, "Stop")
+    field(ONAM, "Stop")
+}
+
+# Pose reachable?
+record(bo, "$(P)$(R)CMD:REACHABLE")
+{
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto reachable_mm($(P)$(R)) $(PORT) $(A)")
+    field(ZNAM, "Check pose")
+    field(ONAM, "Check pose")
+}
+
+record(bi, "$(P)$(R)REACHABLE")
+{
+    field(DTYP, "Soft Channel")
+    field(ZNAM, "Unreachable")
+    field(ONAM, "Reachable")
+    field(ZSV, "MINOR")
+}
+
+# Positions - Readback
+record(bo, "$(P)$(R)CMD:POS_RBV") {
+  field(DESC, "Readback current pose position")
+  field(VAL, "0")
+  field(DTYP, "stream")
+  field(OUT,  "@devSmarPod.proto read_pos($(P)$(R)) $(PORT) $(A)")
+  field(PINI, "NO")
+  field(SCAN, ".1 second")
+}
+
+record(ai, "$(P)$(R)X_M")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "m")
+    field(FLNK, "$(P)$(R)X")
+}
+
+record(ai, "$(P)$(R)Y_M")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "m")
+    field(FLNK, "$(P)$(R)Y")
+}
+
+record(ai, "$(P)$(R)Z_M")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "m")
+    field(FLNK, "$(P)$(R)Z")
+}
+
+record(calc, "$(P)$(R)X")
+{
+    field(INPA, "$(P)$(R)X_M NPP MS")
+    field(CALC, "A * 1000")
+    field(PREC, "5")
+    field(EGU, "mm")
+}
+
+record(calc, "$(P)$(R)Y")
+{
+    field(INPA, "$(P)$(R)Y_M NPP MS")
+    field(CALC, "A * 1000")
+    field(PREC, "5")
+    field(EGU, "mm")
+}
+
+record(calc, "$(P)$(R)Z")
+{
+    field(INPA, "$(P)$(R)Z_M NPP MS")
+    field(CALC, "A * 1000")
+    field(PREC, "5")
+    field(EGU, "mm")
+}
+
+record(ai, "$(P)$(R)RX")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "deg")
+}
+
+record(ai, "$(P)$(R)RY")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "deg")
+}
+
+record(ai, "$(P)$(R)RZ")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "deg")
+}
+
+# Movement - readback
+record(mbbi, "$(P)$(R)MOVING")
+{
+    field(DESC, "Movement status")
+    field(VAL, "0")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_int($(P)$(R),mst) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, ".2 second")
+    field(ZRVL, 0)
+    field(ONVL, 1)
+    field(TWVL, 2)
+
+    field(ZRST, "Stopped")
+    field(ONST, "Holding")
+    field(TWST, "Moving")
+}
+
+# Movement - sync
+record(bo, "$(P)$(R)CMD:SYNC") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto sync_mm($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(ZNAM, "Sync")
+    field(ONAM, "Sync")
+}
+
+record(longin, "$(P)$(R)ERROR_CODE")
+{
+    field(DTYP, "Soft Channel")
+    field(FLNK, "$(P)$(R)ERROR_DESC")
+    field(LOW, 0)
+    field(HIGH, 0)
+    field(LSV, "MINOR")
+    field(HSV, "MINOR")
+    #field(LOLO, 0)
+    #field(HIHI, 0)
+}
+record(stringin, "$(P)$(R)ERROR_DESC")
+{
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto check_error($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+}
+
+
+# Pivot-point
+record(bo, "$(P)$(R)CMD:PIVOT_RBV") {
+  field(DESC, "Readback pivot point")
+  field(VAL, "0")
+  field(DTYP, "stream")
+  field(OUT,  "@devSmarPod.proto read_pivot($(P)$(R)) $(PORT) $(A)")
+  field(PINI, "YES")
+  field(SCAN, "PASSIVE")
+}
+
+record(bo, "$(P)$(R)CMD:SET_PIVOT")
+{
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto set_pivot_mm($(P)$(R)) $(PORT) $(A)")
+    field(FLNK, "$(P)$(R)CMD:PIVOT_RBV")
+}
+
+record(bo, "$(P)$(R)CMD:SYNC_PIVOT") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto sync_pivot_mm($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(ZNAM, "Sync")
+    field(ONAM, "Sync")
+}
+
+record(mbbo, "$(P)$(R)CMD:PIVOT_MODE") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto set_int($(P)$(R),pvm) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(FLNK, "$(P)$(R)PIVOT_MODE")
+    field(ZRVL, 0)
+    field(ONVL, 1)
+
+    field(ZRST, "Relative")
+    field(ONST, "Fixed")
+}
+
+record(mbbi, "$(P)$(R)PIVOT_MODE")
+{
+    field(DESC, "Pivot mode")
+    field(VAL, "0")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_int($(P)$(R),pvm) $(PORT) $(A)")
+    field(PINI, "YES")
+    field(SCAN, "PASSIVE")
+    field(ZRVL, 0)
+    field(ONVL, 1)
+
+    field(ZRST, "Relative")
+    field(ONST, "Fixed")
+}
+
+# Pivot positions
+record(ai, "$(P)$(R)PX_M")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "m")
+    field(FLNK, "$(P)$(R)PX")
+}
+
+record(ai, "$(P)$(R)PY_M")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "m")
+    field(FLNK, "$(P)$(R)PY")
+}
+
+record(ai, "$(P)$(R)PZ_M")
+{
+    field(DTYP, "Soft Channel")
+    field(PREC, "5")
+    field(EGU, "m")
+    field(FLNK, "$(P)$(R)PZ")
+}
+
+record(calc, "$(P)$(R)PX")
+{
+    field(INPA, "$(P)$(R)PX_M NPP MS")
+    field(CALC, "A * 1000")
+    field(PREC, "5")
+    field(EGU, "mm")
+}
+
+record(calc, "$(P)$(R)PY")
+{
+    field(INPA, "$(P)$(R)PY_M NPP MS")
+    field(CALC, "A * 1000")
+    field(PREC, "5")
+    field(EGU, "mm")
+}
+
+record(calc, "$(P)$(R)PZ")
+{
+    field(INPA, "$(P)$(R)PZ_M NPP MS")
+    field(CALC, "A * 1000")
+    field(PREC, "5")
+    field(EGU, "mm")
+}
+
+# Pivot request positions
+record(ao, "$(P)$(R)CMD:PX")
+{
+    field(PREC, "6")
+    field(EGU, "mm")
+}
+
+record(ao, "$(P)$(R)CMD:PY")
+{
+    field(PREC, "6")
+    field(EGU, "mm")
+}
+
+record(ao, "$(P)$(R)CMD:PZ")
+{
+    field(PREC, "6")
+    field(EGU, "mm")
+}
+
+# Miscellaneous
+record(bo, "$(P)$(R)CMD:CALIBRATE") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto calibrate($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(ZNAM, "Calibrate")
+    field(ONAM, "Calibrate")
+}
+
+record(bo, "$(P)$(R)CMD:READ_VER") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto read_version($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(ZNAM, "Read version")
+    field(ONAM, "Read version")
+}
+
+record(stringin, "$(P)$(R)VER:SYS") {
+    field(DTYP, "Soft Channel")
+}
+
+# Version
+record(stringin, "$(P)$(R)VER:MCS") {
+    field(DTYP, "Soft Channel")
+}
+
+record(stringin, "$(P)$(R)VER:SMARPOD") {
+    field(DTYP, "Soft Channel")
+}
+
+record(stringin, "$(P)$(R)VER:SMARPOD") {
+    field(DTYP, "Soft Channel")
+}
+
+# Status
+record(bo, "$(P)$(R)CMD:READ_STATUS") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto read_status($(P)$(R)) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(ZNAM, "Read status")
+    field(ONAM, "Read status")
+    field(SCAN, "10 second")
+}
+
+record(ai, "$(P)$(R)STATUS:TEMP") {
+    field(DTYP, "Soft Channel")
+    field(EGU, "C")
+}
+record(ai, "$(P)$(R)STATUS:LOAD") {
+    field(DTYP, "Soft Channel")
+    field(EGU, "\%")
+}
+record(ai, "$(P)$(R)STATUS:NET_BYTES_IN") {
+    field(DTYP, "Soft Channel")
+    field(EGU, "bytes")
+}
+record(ai, "$(P)$(R)STATUS:NET_BYTES_OUT") {
+    field(DTYP, "Soft Channel")
+    field(EGU, "bytes")
+}
+record(stringin, "$(P)$(R)STATUS:NET") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(P)$(R)STATUS:STATUS") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(P)$(R)STATUS:UPTIME") {
+    field(DTYP, "Soft Channel")
+}
+record(longin, "$(P)$(R)STATUS:CONN") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(P)$(R)STATUS:IP") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(P)$(R)STATUS:CLIENT_IP") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(P)$(R)STATUS:SER_STATUS") {
+    field(DTYP, "Soft Channel")
+}
+record(ai, "$(P)$(R)STATUS:SER_BYTES_IN") {
+    field(DTYP, "Soft Channel")
+    field(EGU, "bytes")
+}
+record(ai, "$(P)$(R)STATUS:SER_BYTES_OUT") {
+    field(DTYP, "Soft Channel")
+    field(EGU, "bytes")
+}
+record(stringin, "$(P)$(R)STATUS:LOW_LEVEL") {
+    field(DTYP, "Soft Channel")
+}
+
+# Sensor mode
+record(mbbo, "$(P)$(R)CMD:SENSOR_MODE") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto set_int($(P)$(R),sen) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(FLNK, "$(P)$(R)SENSOR_MODE")
+    field(ZRVL, 0)
+    field(ONVL, 1)
+    field(TWVL, 2)
+
+    field(ZRST, "Disabled")
+    field(ONST, "Enabled")
+    field(TWST, "Power-save")
+    field(FLNK, "$(P)$(R)SENSOR_MODE")
+}
+
+record(mbbi, "$(P)$(R)SENSOR_MODE")
+{
+    field(DESC, "Sensor mode")
+    field(VAL, "0")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_int($(P)$(R),sen) $(PORT) $(A)")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(ZRVL, 0)
+    field(ONVL, 1)
+    field(TWVL, 2)
+
+    field(ZRST, "Disabled")
+    field(ONST, "Enabled")
+    field(TWST, "Power-save")
+}
+
+# Maximum frequency
+record(ao, "$(P)$(R)CMD:FREQ") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto set_float($(P)$(R),frq) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(EGU, "Hz")
+    field(PREC, "1")
+    field(FLNK, "$(P)$(R)FREQ")
+}
+
+record(ai, "$(P)$(R)FREQ")
+{
+    field(DESC, "Maximum frequency")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_float($(P)$(R),frq) $(PORT) $(A)")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(EGU, "Hz")
+    field(VAL, "8000")
+    field(PREC, "1")
+}
+
+# Maximum velocity
+record(ao, "$(P)$(R)CMD:VEL") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto set_float($(P)$(R),vel) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(EGU, "m/s")
+    field(PREC, "5")
+    field(FLNK, "$(P)$(R)VEL")
+}
+
+record(ai, "$(P)$(R)VEL")
+{
+    field(DESC, "Velocity")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_float($(P)$(R),vel) $(PORT) $(A)")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(EGU, "m/s")
+    field(PREC, "5")
+}
+
+# Maximum acceleration
+record(ao, "$(P)$(R)CMD:ACCEL") {
+    field(DTYP, "stream")
+    field(OUT,  "@devSmarPod.proto set_float($(P)$(R),acc) $(PORT) $(A)")
+    field(PINI, "NO")
+    field(SCAN, "Passive")
+    field(EGU, "m/s^2")
+    field(PREC, "5")
+    field(FLNK, "$(P)$(R)ACCEL")
+}
+
+record(ai, "$(P)$(R)ACCEL")
+{
+    field(DESC, "Acceleration")
+    field(DTYP, "stream")
+    field(INP,  "@devSmarPod.proto read_float($(P)$(R),acc) $(PORT) $(A)")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(EGU, "m/s^2")
+    field(PREC, "5")
+}
+

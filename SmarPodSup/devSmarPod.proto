@@ -1,0 +1,192 @@
+Separator = CR LF;
+ExtraInput = Ignore;
+
+valid_chars = "[a-zA-Z0-9._: ]";
+
+check_error {
+    out "\%code? %(\$1ERROR_CODE)d";
+    in "%(\$1ERROR_DESC)" $valid_chars;
+}
+
+initialize_smarpod {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    # Set CRLF as line end
+    out "\%set lineend-format 0";
+    in "!0";
+
+    # Set automatic (fixed/scientific) format for numbers
+    out "\%set number-format 0";
+    in "!0";
+}
+
+# Pivot
+
+read_pivot {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    out "piv?";
+    in "%(\$1PX_M)f %(\$1PY_M)f %(\$1PZ_M)f";
+}
+
+sync_pivot_mm {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    
+    # Sync request with readback values
+    out "\%echo %(\$1PX)g %(\$1PY)g %(\$1PZ)g";
+    in "%(\$1CMD:PX)f %(\$1CMD:PY)f %(\$1CMD:PZ)f";
+}
+
+set_pivot_mm {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    # Append m to indicate mm positions
+    out "piv %(\$1CMD:PX)gm %(\$1CMD:PY)gm %(\$1CMD:PZ)gm";
+    in "!0";
+}
+
+# Positions/movement
+read_pos {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    out "pos?";
+    in "%(\$1X_M)f %(\$1Y_M)f %(\$1Z_M)f %(\$1RX)f %(\$1RY)f %(\$1RZ)f";
+}
+
+sync_mm {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    
+    # Sync request with readback values
+    out "\%echo %(\$1X)g %(\$1Y)g %(\$1Z)g %(\$1RX)g %(\$1RY)g %(\$1RZ)g";
+    in "%(\$1CMD:X)f %(\$1CMD:Y)f %(\$1CMD:Z)f %(\$1CMD:RX)f %(\$1CMD:RY)f %(\$1CMD:RZ)f";
+}
+
+move_mm {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    # Append m to indicate mm positions
+    out "mov %(\$1CMD:X)gm %(\$1CMD:Y)gm %(\$1CMD:Z)gm %(\$1CMD:RX)g %(\$1CMD:RY)g %(\$1CMD:RZ)g";
+    in "!0";
+}
+
+reachable_mm {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    # Append m to indicate mm positions
+    out "rea? %(\$1CMD:X)gm %(\$1CMD:Y)gm %(\$1CMD:Z)gm %(\$1CMD:RX)g %(\$1CMD:RY)g %(\$1CMD:RZ)g";
+    in "%(\$1REACHABLE)d";
+}
+
+# Referencing
+
+async_ref_response {
+    # Not sure if this works as expected.
+    in "(Reference response)";
+    in "!%d";
+}
+
+reference {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    # Referencing can take a long time
+    # If we fail to get a reply within that time, responses will become confused
+    ReplyTimeout = 100;
+
+    out "ref";
+    out "\%echo (Reference response)";
+    wait 15000;
+    in "(Reference response)";
+    in "!0";
+}
+
+calibrate {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+
+    # Calibration can take a long time
+    # If we fail to get a reply within that time, responses will become confused
+    ReplyTimeout = 100;
+
+    out "cal";
+    out "\%echo (Reference response)";
+    wait 15000;
+    in "(Reference response)";
+    in "!0";
+}
+
+# Version information
+read_version {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    out "\%info version";
+    in "Versions:";
+    in "  SmarAct Embedded Controller %(\$1VER:SYS)" $valid_chars;
+    in "  MCS library%(\$1VER:MCS)" $valid_chars;
+    in "  SmarPod library: %(\$1VER:SMARPOD)" $valid_chars;
+}
+
+read_status {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    out "\%info status";
+    in "Status: %(\$1STATUS:STATUS)" $valid_chars;
+    in "System Time: %(\$1STATUS:UPTIME)" $valid_chars;
+    in "Temperature: %(\$1STATUS:TEMP)f";
+    in "CPU Load: %(\$1STATUS:LOAD)f";
+    in "Network IO: %(\$1STATUS:NET)" $valid_chars "(%(\$1STATUS:NET_BYTES_IN)d bytes read, %(\$1STATUS:NET_BYTES_OUT)d bytes written, %(\$1STATUS:CONN)d connections)";
+    in "IP address: %(\$1STATUS:IP)" $valid_chars;
+    in "Connected network client: %(\$1STATUS:CLIENT_IP)" $valid_chars;
+    in "Serial IO: %(\$1STATUS:SER_STATUS)" $valid_chars "(%(\$1STATUS:SER_BYTES_IN)d bytes read, %(\$1STATUS:SER_BYTES_OUT)d bytes written)";
+    in "Low-Level: %(\$1STATUS:LOW_LEVEL)" $valid_chars;
+}
+
+# Generic
+read_int {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    out "\$2?";
+    in "%d";
+}
+
+set_int {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    out "\$2 %d";
+    in "!0";
+}
+
+read_float {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    out "\$2?";
+    in "%f";
+}
+
+set_float {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    out "\$2 %f";
+    in "!0";
+}
+simple_cmd {
+    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    out "\$2";
+    in "!0";
+}
+
+#
+# %info status
+# Status: ready
+# System Time: 1d:21h:3233s
+# Temperature: 50.00
+# CPU Load: 0.00
+# Network IO: ok (910158 bytes read, 5764892 bytes written, 41 connections)
+# IP address: 10.0.3.1
+# Connected network client: 10.0.0.1
+# Serial IO: ok (0 bytes read, 0 bytes written)
+# Low-Level: 0
+# 
+# 
+# %info version
+# Versions:
+#   SmarAct Embedded Controller 1.1.1
+#   MCS library
+#   SmarPod library: 1.4.9
+# 
+# %info units
+# units:
+#   u0: smarpod #0: model 10001, mcs #0 (id 3155076337) (active)
+
