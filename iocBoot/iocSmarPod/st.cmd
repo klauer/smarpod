@@ -9,6 +9,7 @@ epicsEnvSet "P" "$(P=E1:)"
 epicsEnvSet "R" "$(R=SmarPod:)"
 epicsEnvSet "SMARPOD_IP" "$(SMARPOD_IP=10.0.3.9)"
 epicsEnvSet "SMARPOD_PORT" "$(SMARPOD_PORT=2000)"
+epicsEnvSet "ASYN_PORT" "SP_PORT"
 
 ## Register all support components
 dbLoadDatabase("$(TOP)/dbd/SmarPodtest.dbd",0,0)
@@ -16,17 +17,17 @@ SmarPodtest_registerRecordDeviceDriver(pdbbase)
 
 ###############################################################################
 # Set up ASYN ports
-drvAsynIPPortConfigure("smarpod_port","$(SMARPOD_IP):$(SMARPOD_PORT)",0,0,0)
-asynOctetSetInputEos("smarpod_port", -1, "\n")
-asynOctetSetOutputEos("smarpod_port", -1, "\n")
-asynSetTraceIOMask("smarpod_port",-1,0)
-asynSetTraceMask("smarpod_port",-1,0)
-#asynSetTraceIOMask("smarpod_port",-1,0x2)
-#asynSetTraceMask("smarpod_port",-1,0x9)
+drvAsynIPPortConfigure("$(ASYN_PORT)","$(SMARPOD_IP):$(SMARPOD_PORT)",0,0,0)
+asynOctetSetInputEos("$(ASYN_PORT)", -1, "\n")
+asynOctetSetOutputEos("$(ASYN_PORT)", -1, "\n")
+asynSetTraceIOMask("$(ASYN_PORT)",-1,0)
+asynSetTraceMask("$(ASYN_PORT)",-1,0)
+#asynSetTraceIOMask("$(ASYN_PORT)",-1,0x2)
+#asynSetTraceMask("$(ASYN_PORT)",-1,0x9)
 
 ###############################################################################
 ## Load record instances
-dbLoadRecords("$(TOP)/db/devSmarPod.db","user=nanopos,P=$(P),R=$(R),PORT=smarpod_port,A=0")
+dbLoadRecords("$(TOP)/db/devSmarPod.db","P=$(P),R=$(R),PORT=$(ASYN_PORT),A=0")
 
 iocInit()
 #var streamDebug 1
