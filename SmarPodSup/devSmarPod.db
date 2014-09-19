@@ -264,7 +264,7 @@ record(bo, "$(P)$(R)CMD:PIVOT_RBV") {
   field(DTYP, "stream")
   field(OUT,  "@devSmarPod.proto read_pivot($(P)$(R)) $(PORT) $(A)")
   field(PINI, "YES")
-  field(SCAN, "PASSIVE")
+  field(SCAN, "Passive")
 }
 
 record(bo, "$(P)$(R)CMD:SET_PIVOT")
@@ -303,7 +303,7 @@ record(mbbi, "$(P)$(R)PIVOT_MODE")
     field(DTYP, "stream")
     field(INP,  "@devSmarPod.proto read_int($(P)$(R),pvm) $(PORT) $(A)")
     field(PINI, "YES")
-    field(SCAN, "PASSIVE")
+    field(SCAN, "Passive")
     field(ZRVL, 0)
     field(ONVL, 1)
 
