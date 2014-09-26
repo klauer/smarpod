@@ -15,13 +15,18 @@ DBD += SmarPodtest.dbd
 # SmarPodtest.dbd will be made up from these files:
 SmarPodtest_DBD += base.dbd
 SmarPodtest_DBD += stream.dbd
-SmarPodtest_DBD += asyn.dbd drvAsynIPPort.dbd drvAsynSerialPort.dbd aCalcoutRecord.dbd
+SmarPodtest_DBD += asyn.dbd drvAsynIPPort.dbd drvAsynSerialPort.dbd
+SmarPodtest_DBD += calcSupport.dbd
+
+# Autosave
+SmarPodtest_DBD += asSupport.dbd
 
 # Include dbd files from all support applications:
 #SmarPodtest_DBD += xxx.dbd
 
 # Add all the support libraries needed by this IOC
-SmarPodtest_LIBS += asyn stream calc
+SmarPodtest_LIBS += asyn stream calc 
+SmarPodtest_LIBS += autosave
 
 # SmarPodtest_registerRecordDeviceDriver.cpp derives from SmarPodtest.dbd
 SmarPodtest_SRCS += SmarPodtest_registerRecordDeviceDriver.cpp

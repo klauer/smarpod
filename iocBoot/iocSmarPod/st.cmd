@@ -1,11 +1,15 @@
 #!../../bin/linux-x86/SmarPodtest
 
+epicsEnvSet("P_SAVE", "ZP:SMARPOD:")
+epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST", "NO")
+epicsEnvSet("EPICS_CA_ADDR_LIST", "10.0.0.255")
+
 < envPaths
 epicsEnvSet "STREAM_PROTOCOL_PATH" "$(TOP)/db"
 
 ###############################################################################
 # Allow PV name prefixes and serial port name to be set from the environment
-epicsEnvSet "P" "$(P=E1:)"
+epicsEnvSet "P" "$(P=ZP:)"
 epicsEnvSet "R" "$(R=SmarPod:)"
 epicsEnvSet "SMARPOD_IP" "$(SMARPOD_IP=10.0.3.9)"
 epicsEnvSet "SMARPOD_PORT" "$(SMARPOD_PORT=2000)"
@@ -25,11 +29,19 @@ asynSetTraceMask("$(ASYN_PORT)",-1,0)
 #asynSetTraceIOMask("$(ASYN_PORT)",-1,0x2)
 #asynSetTraceMask("$(ASYN_PORT)",-1,0x9)
 
+# < $(HXN)/boot/save_restore.cmd
+< save_restore.cmd
+
 ###############################################################################
 ## Load record instances
 dbLoadRecords("$(TOP)/db/devSmarPod.db","P=$(P),R=$(R),PORT=$(ASYN_PORT),A=0")
 
-iocInit()
-#var streamDebug 1
-dbpr E1:SmarPod:X
+makeAutosaveFiles()
 
+iocInit()
+
+# var streamDebug 0
+# dbpr ZP:SmarPod:X
+
+create_monitor_set("info_positions.req", 5, "")
+create_monitor_set("info_settings.req", 30, "")

@@ -20,6 +20,9 @@ record(ao, "$(P)$(R)CMD:UNIT") {
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(FLNK, "$(P)$(R)UNIT")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "")
 }
 
 record(ai, "$(P)$(R)UNIT")
@@ -72,36 +75,54 @@ record(ao, "$(P)$(R)CMD:X")
 {
     field(PREC, "6")
     field(EGU, "mm")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 record(ao, "$(P)$(R)CMD:Y")
 {
     field(PREC, "6")
     field(EGU, "mm")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 record(ao, "$(P)$(R)CMD:Z")
 {
     field(PREC, "6")
     field(EGU, "mm")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 record(ao, "$(P)$(R)CMD:RX")
 {
     field(PREC, "6")
     field(EGU, "deg")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 record(ao, "$(P)$(R)CMD:RY")
 {
     field(PREC, "6")
     field(EGU, "deg")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 record(ao, "$(P)$(R)CMD:RZ")
 {
     field(PREC, "6")
     field(EGU, "deg")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 # Stop
@@ -365,18 +386,27 @@ record(ao, "$(P)$(R)CMD:PX")
 {
     field(PREC, "6")
     field(EGU, "mm")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 record(ao, "$(P)$(R)CMD:PY")
 {
     field(PREC, "6")
     field(EGU, "mm")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 record(ao, "$(P)$(R)CMD:PZ")
 {
     field(PREC, "6")
     field(EGU, "mm")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "VAL")
 }
 
 # Miscellaneous
@@ -517,6 +547,9 @@ record(ao, "$(P)$(R)CMD:FREQ") {
     field(EGU, "Hz")
     field(PREC, "1")
     field(FLNK, "$(P)$(R)FREQ")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "")
 }
 
 record(ai, "$(P)$(R)FREQ")
@@ -540,6 +573,9 @@ record(ao, "$(P)$(R)CMD:VEL") {
     field(EGU, "m/s")
     field(PREC, "5")
     field(FLNK, "$(P)$(R)VEL")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "")
 }
 
 record(ai, "$(P)$(R)VEL")
@@ -562,6 +598,9 @@ record(ao, "$(P)$(R)CMD:ACCEL") {
     field(EGU, "m/s^2")
     field(PREC, "5")
     field(FLNK, "$(P)$(R)ACCEL")
+
+    info(autosaveFields_pass0, "VAL")
+    info(autosaveFields, "")
 }
 
 record(ai, "$(P)$(R)ACCEL")
