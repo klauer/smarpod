@@ -1,0 +1,12 @@
+OPI screens for CSS BOY
+
+Note that you'll either have to:
+1. Edit the macros on the display and set Sys and Dev to appropriate values for the IOC
+   or
+2. Make a new screen (with e.g. a menu button) that loads smarpod.opi and sets the same macros.
+
+The default settings, which should be changed, are listed in st.cmd:
+
+    epicsEnvSet("SYS"                    , "XF:03IDC-ES")
+    epicsEnvSet("CT_SYS"                 , "XF:03IDC-CT")
+    epicsEnvSet("DEV"                    , "SPod:1")
