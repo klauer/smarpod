@@ -7,7 +7,7 @@ TOP = .
 include $(TOP)/configure/CONFIG
 
 DIRS := configure
-#DIRS += StreamDevice
+DIRS += StreamDevice
 DIRS += $(wildcard *[Ss]up)
 DIRS += $(wildcard *[Aa]pp)
 DIRS += $(wildcard ioc[Bb]oot)

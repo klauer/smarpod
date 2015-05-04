@@ -11,10 +11,19 @@
 # Define path to sequencer if needed
 #SNCSEQ=_SNCSEQ_
 
-# Asyn
-ASYN=/usr/lib/epics
-
-# EPICS_BASE usually appears last so other apps can preempt definitions
-EPICS_BASE=/usr/lib/epics
 STREAM_DEVICE=$(TOP)/StreamDevice
 
+SUPPORT=/epics/support
+HXN=$(SUPPORT)/hxn-common
+
+ASYN=/usr/lib/epics
+EPICS_BASE=/usr/lib/epics
+
+# STREAM_DEVICE=$(TOP)
+# 
+# SUPPORT=/epics/base/3.14.12.4/support
+# HXN=/epics/support/hxn-common
+# 
+# ASYN=$(SUPPORT)/asyn/4-26
+# CALC=$(SUPPORT)/calc/3-4-2
+# EPICS_BASE=$(SUPPORT)/..

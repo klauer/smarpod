@@ -4,12 +4,12 @@ ExtraInput = Ignore;
 valid_chars = "[a-zA-Z0-9._: ]";
 
 check_error {
-    out "\%code? %(\$1ERROR_CODE)d";
-    in "%(\$1ERROR_DESC)" $valid_chars;
+    out "\%code? %(\$1{\$2}Err-I)d";
+    in "%(\$1{\$2}ErrDesc-I)" $valid_chars;
 }
 
 initialize_smarpod {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     # Set CRLF as line end
     out "\%set lineend-format 0";
@@ -23,58 +23,59 @@ initialize_smarpod {
 # Pivot
 
 read_pivot {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     out "piv?";
-    in "%(\$1PX_M)f %(\$1PY_M)f %(\$1PZ_M)f";
+    in "%(\$1{\$2-Ax:1}Piv_)f %(\$1{\$2-Ax:2}Piv_)f %(\$1{\$2-Ax:3}Piv_)f";
 }
 
 sync_pivot_mm {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
     
     # Sync request with readback values
-    out "\%echo %(\$1PX)g %(\$1PY)g %(\$1PZ)g";
-    in "%(\$1CMD:PX)f %(\$1CMD:PY)f %(\$1CMD:PZ)f";
+    out "\%echo %(\$1{\$2-Ax:1}Piv-I)g %(\$1{\$2-Ax:2}Piv-I)g %(\$1{\$2-Ax:3}Piv-I)g";
+    in "%(\$1{\$2-Ax:1}Piv-SP)f %(\$1{\$2-Ax:2}Piv-SP)f %(\$1{\$2-Ax:3}Piv-SP)f";
 }
 
 set_pivot_mm {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     # Append m to indicate mm positions
-    out "piv %(\$1CMD:PX)gm %(\$1CMD:PY)gm %(\$1CMD:PZ)gm";
+    out "piv %(\$1{\$2-Ax:1}Piv-SP)gm %(\$1{\$2-Ax:2}Piv-SP)gm %(\$1{\$2-Ax:3}Piv-SP)gm";
     in "!0";
 }
 
 # Positions/movement
 read_pos {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     out "pos?";
-    in "%(\$1X_M)f %(\$1Y_M)f %(\$1Z_M)f %(\$1RX)f %(\$1RY)f %(\$1RZ)f";
+    in "%(\$1{\$2-Ax:1}Pos_)f %(\$1{\$2-Ax:2}Pos_)f %(\$1{\$2-Ax:3}Pos_)f %(\$1{\$2-Ax:1}Rot-I)f %(\$1{\$2-Ax:2}Rot-I)f %(\$1{\$2-Ax:3}Rot-I)f";
 }
 
 sync_mm {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
     
-    # Sync request with readback values
-    out "\%echo %(\$1X)g %(\$1Y)g %(\$1Z)g %(\$1RX)g %(\$1RY)g %(\$1RZ)g";
-    in "%(\$1CMD:X)f %(\$1CMD:Y)f %(\$1CMD:Z)f %(\$1CMD:RX)f %(\$1CMD:RY)f %(\$1CMD:RZ)f";
+    # Sync request with readback values (this uses the current values instead of querying
+    # again, as they are already properly scaled in mm)
+    out "\%echo %(\$1{\$2-Ax:1}Pos-I)g %(\$1{\$2-Ax:2}Pos-I)g %(\$1{\$2-Ax:3}Pos-I)g %(\$1{\$2-Ax:1}Rot-I)g %(\$1{\$2-Ax:2}Rot-I)g %(\$1{\$2-Ax:3}Rot-I)g";
+    in "%(\$1{\$2-Ax:1}Pos-SP)f %(\$1{\$2-Ax:2}Pos-SP)f %(\$1{\$2-Ax:3}Pos-SP)f %(\$1{\$2-Ax:1}Rot-SP)f %(\$1{\$2-Ax:2}Rot-SP)f %(\$1{\$2-Ax:3}Rot-SP)f";
 }
 
 move_mm {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     # Append m to indicate mm positions
-    out "mov %(\$1CMD:X)gm %(\$1CMD:Y)gm %(\$1CMD:Z)gm %(\$1CMD:RX)g %(\$1CMD:RY)g %(\$1CMD:RZ)g";
+    out "mov %(\$1{\$2-Ax:1}Pos-SP)gm %(\$1{\$2-Ax:2}Pos-SP)gm %(\$1{\$2-Ax:3}Pos-SP)gm %(\$1{\$2-Ax:1}Rot-SP)g %(\$1{\$2-Ax:2}Rot-SP)g %(\$1{\$2-Ax:3}Rot-SP)g";
     in "!0";
 }
 
 reachable_mm {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     # Append m to indicate mm positions
-    out "rea? %(\$1CMD:X)gm %(\$1CMD:Y)gm %(\$1CMD:Z)gm %(\$1CMD:RX)g %(\$1CMD:RY)g %(\$1CMD:RZ)g";
-    in "%(\$1REACHABLE)d";
+    out "rea? %(\$1{\$2-Ax:1}Pos-SP)gm %(\$1{\$2-Ax:2}Pos-SP)gm %(\$1{\$2-Ax:3}Pos-SP)gm %(\$1{\$2-Ax:1}Rot-SP)g %(\$1{\$2-Ax:2}Rot-SP)g %(\$1{\$2-Ax:3}Rot-SP)g";
+    in "%(\$1{\$2}Reach-I)d";
 }
 
 # Referencing
@@ -86,7 +87,7 @@ async_ref_response {
 }
 
 reference {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     # Referencing can take a long time
     # If we fail to get a reply within that time, responses will become confused
@@ -100,7 +101,7 @@ reference {
 }
 
 calibrate {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
 
     # Calibration can take a long time
     # If we fail to get a reply within that time, responses will become confused
@@ -115,55 +116,55 @@ calibrate {
 
 # Version information
 read_version {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
     out "\%info version";
     in "Versions:";
-    in "  SmarAct Embedded Controller %(\$1VER:SYS)" $valid_chars;
-    in "  MCS library%(\$1VER:MCS)" $valid_chars;
-    in "  SmarPod library: %(\$1VER:SMARPOD)" $valid_chars;
+    in "  SmarAct Embedded Controller %(\$1{\$2}Ver:Sys)" $valid_chars;
+    in "  MCS library%(\$1{\$2}Ver:Mcs)" $valid_chars;
+    in "  SmarPod library: %(\$1{\$2}Ver:SPod)" $valid_chars;
 }
 
 read_status {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
     out "\%info status";
-    in "Status: %(\$1STATUS:STATUS)" $valid_chars;
-    in "System Time: %(\$1STATUS:UPTIME)" $valid_chars;
-    in "Temperature: %(\$1STATUS:TEMP)f";
-    in "CPU Load: %(\$1STATUS:LOAD)f";
-    in "Network IO: %(\$1STATUS:NET)" $valid_chars "(%(\$1STATUS:NET_BYTES_IN)d bytes read, %(\$1STATUS:NET_BYTES_OUT)d bytes written, %(\$1STATUS:CONN)d connections)";
-    in "IP address: %(\$1STATUS:IP)" $valid_chars;
-    in "Connected network client: %(\$1STATUS:CLIENT_IP)" $valid_chars;
-    in "Serial IO: %(\$1STATUS:SER_STATUS)" $valid_chars "(%(\$1STATUS:SER_BYTES_IN)d bytes read, %(\$1STATUS:SER_BYTES_OUT)d bytes written)";
-    in "Low-Level: %(\$1STATUS:LOW_LEVEL)" $valid_chars;
+    in "Status: %(\$1{\$2}Sts)" $valid_chars;
+    in "System Time: %(\$1{\$2}Sts:Uptime)" $valid_chars;
+    in "Temperature: %(\$1{\$2}Sts:Temp)f";
+    in "CPU Load: %(\$1{\$2}Sts:Load)f";
+    in "Network IO: %(\$1{\$2}Sts:Net)" $valid_chars "(%(\$1{\$2}Sts:NetIn)d bytes read, %(\$1{\$2}Sts:NetOut)d bytes written, %(\$1{\$2}Sts:Conn)d connections)";
+    in "IP address: %(\$1{\$2}Sts:Ip)" $valid_chars;
+    in "Connected network client: %(\$1{\$2}Sts:ClientIP)" $valid_chars;
+    in "Serial IO: %(\$1{\$2}Sts:Ser)" $valid_chars "(%(\$1{\$2}Sts:SerIn)d bytes read, %(\$1{\$2}Sts:SerOut)d bytes written)";
+    in "Low-Level: %(\$1{\$2}Sts:LowLevel)" $valid_chars;
 }
 
 # Generic
 read_int {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
-    out "\$2?";
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    out "\$3?";
     in "%d";
 }
 
 set_int {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
-    out "\$2 %d";
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    out "\$3 %d";
     in "!0";
 }
 
 read_float {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
-    out "\$2?";
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    out "\$3?";
     in "%f";
 }
 
 set_float {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
-    out "\$2 %f";
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    out "\$3 %f";
     in "!0";
 }
 simple_cmd {
-    @mismatch { in "!%(\$1ERROR_CODE)d"; }
-    out "\$2";
+    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    out "\$3";
     in "!0";
 }
 
