@@ -66,6 +66,42 @@ record(ai, "$(Sys){$(Dev)}ARef-I")
 # Positions - Move
 record(bo, "$(Sys){$(Dev)}Move-Cmd")
 {
+    field(ZNAM, "Move")
+    field(ONAM, "Move")
+    field(FLNK, "$(Sys){$(Dev)}Move-Seq_")
+}
+
+record(seq, "$(Sys){$(Dev)}Move-Seq_")
+{
+    # Disable updating motion polling
+    field(LNK1, "$(Sys){$(Dev)}MotionRequest_ PP")
+    field(DOL1, "1")
+    
+    # Set the busy record after polling has definitely stopped
+    # field(DLY2, "0.05")
+    field(LNK2, "$(Sys){$(Dev)}BusyMoving_ PP")
+    field(DOL2, "1")
+
+    # Start the motion
+    field(LNK3, "$(Sys){$(Dev)}Move-Cmd_ PP")
+    field(DOL3, "1")
+
+    # Re-enable motion status polling (after 200ms)
+    field(DLY4, "0.2")
+    field(LNK4, "$(Sys){$(Dev)}MotionRequest_ PP")
+    field(DOL4, "0")
+}
+
+record(busy, "$(Sys){$(Dev)}BusyMoving_")
+{
+    field(DESC, "Allows put completion with Move-Cmd")
+    field(VAL, 0)
+    field(PINI, "YES")
+}
+
+record(bo, "$(Sys){$(Dev)}Move-Cmd_")
+{
+    field(DESC, "Move to a position")
     field(DTYP, "stream")
     field(OUT,  "@devSmarPod.proto move_mm($(Sys),$(Dev)) $(PORT) $(A)")
 }
@@ -411,14 +447,37 @@ record(ai, "$(Sys){$(Dev)-Ax:3}Rot-I")
 }
 
 # Movement - readback
-record(mbbi, "$(Sys){$(Dev)}Moving-I")
+record(longin, "$(Sys){$(Dev)}MovingRaw-I_")
 {
-    field(DESC, "Movement status")
     field(VAL, "0")
     field(DTYP, "stream")
     field(INP,  "@devSmarPod.proto read_int($(Sys),$(Dev),mst) $(PORT) $(A)")
     field(PINI, "NO")
     field(SCAN, ".2 second")
+}
+
+record(calc, "$(Sys){$(Dev)}Moving-I_") {
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev)}MovingRaw-I_ CP MS")
+    field(INPB, "$(Sys){$(Dev)}MotionRequest_ CP MS")
+
+    # If a motion request is happening, report 'moving' as the status.
+    # Otherwise, get the motion status from the device.
+    field(CALC, "(B=1) ? 2 : A")
+}
+
+record(bo, "$(Sys){$(Dev)}MotionRequest_") {
+    field(VAL, "0")
+    field(PINI, "YES")
+}
+
+record(mbbi, "$(Sys){$(Dev)}Moving-I")
+{
+    field(DESC, "Movement status")
+    field(PINI, "YES")
+    field(INP,  "$(Sys){$(Dev)}Moving-I_ CP MS")
+    field(SCAN, "Passive")
+    field(VAL, "0")
     field(ZRVL, 0)
     field(ONVL, 1)
     field(TWVL, 2)
@@ -426,6 +485,19 @@ record(mbbi, "$(Sys){$(Dev)}Moving-I")
     field(ZRST, "Stopped")
     field(ONST, "Holding")
     field(TWST, "Moving")
+}
+
+record(calcout, "$(Sys){$(Dev)}MotionInProgress_") {
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+
+    field(INPA, "$(Sys){$(Dev)}Moving-I CP")
+    # motion_in_progress = (moving_status == moving[2])
+    # when motion_in_progress transitions to 0, moving status was 'moving',
+    # then it went to something else.
+    field(CALC, "A=2")
+    field(OOPT, "Transition To Zero")
+    field(OUT, "$(Sys){$(Dev)}BusyMoving_ PP")
 }
 
 # Movement - sync

@@ -68,7 +68,6 @@ save_restoreSet_status_prefix("$(IOC_PREFIX)")
 iocInit()
 
 var streamDebug 0
-# dbpr ZP:SmarPod:X
 
 # create_monitor_set("info_positions.req", 5, "")
 # create_monitor_set("info_settings.req", 30, "")

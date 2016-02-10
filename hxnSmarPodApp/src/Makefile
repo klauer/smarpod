@@ -24,12 +24,14 @@ hxnSmarPod_DBD += asSupport.dbd
 hxnSmarPod_DBD += system.dbd
 hxnSmarPod_DBD += devIocStats.dbd
 hxnSmarPod_DBD += caPutLog.dbd
+hxnSmarPod_DBD += busySupport.dbd
 
 # Add all the support libraries needed by this IOC
 hxnSmarPod_LIBS += asyn stream calc 
 hxnSmarPod_LIBS += autosave
 hxnSmarPod_LIBS += devIocStats
 hxnSmarPod_LIBS += caPutLog
+hxnSmarPod_LIBS += busy
 
 # hxnSmarPod_registerRecordDeviceDriver.cpp derives from hxnSmarPod.dbd
 hxnSmarPod_SRCS += hxnSmarPod_registerRecordDeviceDriver.cpp
