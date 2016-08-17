@@ -1,0 +1,10 @@
+.hg/
+O.*
+bin/*
+old
+records.dbl
+*.sw[op]
+envPaths
+.git
+.svn
+SmarPodSup/

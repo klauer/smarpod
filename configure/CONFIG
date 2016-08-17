@@ -2,7 +2,7 @@
 include $(TOP)/configure/CONFIG_APP
 # Add any changes to make definitions here
 
-#CROSS_COMPILER_TARGET_ARCHS = linux-x86-debug
+CROSS_COMPILER_TARGET_ARCHS = linux-x86_64-debug
 
 # Use this when your IOC and the host use different paths
 # to access the application. Typically this will be 

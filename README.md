@@ -28,7 +28,7 @@ Installation
     2. If using the Debian packages, everything can be pointed to /usr/lib/epics
 3. Edit iocBoot/iocSmarPod/st.cmd
     1. Change the shebang on the top of the script if your architecture is different than linux-x86:
-        #!../../bin/linux-x86/SmarPodtest
+        #!../../bin/linux-x86/hxnSmarPod
         (check if the environment variable EPICS_HOST_ARCH is set, or perhaps `uname -a`, or ask someone if
          you don't know)
     2. The following lines set the prefix to all of the additional (i.e., non-motor record) PVs (with $(P)$(R)):
