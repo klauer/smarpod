@@ -1,15 +1,20 @@
-Separator = CR LF;
-ExtraInput = Ignore;
+InTerminator  = CR LF;
+OutTerminator = CR LF;
+LockTimeout   =  5000;
+ReplyTimeout  = 3000;
+ReadTimeout   =  100;
+WriteTimeout  =  100;
+ExtraInput    = Ignore;
 
-valid_chars = "[a-zA-Z0-9._: ]";
+valid_chars = "[-a-zA-Z0-9._: ]";
 
 check_error {
-    out "\%code? %(\$1{\$2}Err-I)d";
-    in "%(\$1{\$2}ErrDesc-I)" $valid_chars;
+    out "\%code? %(\$1:ERROR_CODE)d";
+    in "%(\$1:ERROR_DESC)" $valid_chars;
 }
 
 initialize_smarpod {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     # Set CRLF as line end
     out "\%set lineend-format 0";
@@ -23,59 +28,58 @@ initialize_smarpod {
 # Pivot
 
 read_pivot {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     out "piv?";
-    in "%(\$1{\$2-Ax:1}Piv_)f %(\$1{\$2-Ax:2}Piv_)f %(\$1{\$2-Ax:3}Piv_)f";
+    in "%(\$1:PX_M)f %(\$1:PY_M)f %(\$1:PZ_M)f";
 }
 
 sync_pivot_mm {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
     
     # Sync request with readback values
-    out "\%echo %(\$1{\$2-Ax:1}Piv-I)g %(\$1{\$2-Ax:2}Piv-I)g %(\$1{\$2-Ax:3}Piv-I)g";
-    in "%(\$1{\$2-Ax:1}Piv-SP)f %(\$1{\$2-Ax:2}Piv-SP)f %(\$1{\$2-Ax:3}Piv-SP)f";
+    out "\%echo %(\$1:PX)g %(\$1:PY)g %(\$1:PZ)g";
+    in "%(\$1:CMD:PX)f %(\$1:CMD:PY)f %(\$1:CMD:PZ)f";
 }
 
 set_pivot_mm {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     # Append m to indicate mm positions
-    out "piv %(\$1{\$2-Ax:1}Piv-SP)gm %(\$1{\$2-Ax:2}Piv-SP)gm %(\$1{\$2-Ax:3}Piv-SP)gm";
+    out "piv %(\$1:CMD:PX)gm %(\$1:CMD:PY)gm %(\$1:CMD:PZ)gm";
     in "!0";
 }
 
 # Positions/movement
 read_pos {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     out "pos?";
-    in "%(\$1{\$2-Ax:1}Pos_)f %(\$1{\$2-Ax:2}Pos_)f %(\$1{\$2-Ax:3}Pos_)f %(\$1{\$2-Ax:1}Rot-I)f %(\$1{\$2-Ax:2}Rot-I)f %(\$1{\$2-Ax:3}Rot-I)f";
+    in "%(\$1:X_M)f %(\$1:Y_M)f %(\$1:Z_M)f %(\$1:RX)f %(\$1:RY)f %(\$1:RZ)f";
 }
 
 sync_mm {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
     
-    # Sync request with readback values (this uses the current values instead of querying
-    # again, as they are already properly scaled in mm)
-    out "\%echo %(\$1{\$2-Ax:1}Pos-I)g %(\$1{\$2-Ax:2}Pos-I)g %(\$1{\$2-Ax:3}Pos-I)g %(\$1{\$2-Ax:1}Rot-I)g %(\$1{\$2-Ax:2}Rot-I)g %(\$1{\$2-Ax:3}Rot-I)g";
-    in "%(\$1{\$2-Ax:1}Pos-SP)f %(\$1{\$2-Ax:2}Pos-SP)f %(\$1{\$2-Ax:3}Pos-SP)f %(\$1{\$2-Ax:1}Rot-SP)f %(\$1{\$2-Ax:2}Rot-SP)f %(\$1{\$2-Ax:3}Rot-SP)f";
+    # Sync request with readback values
+    out "\%echo %(\$1:X)g %(\$1:Y)g %(\$1:Z)g %(\$1:RX)g %(\$1:RY)g %(\$1:RZ)g";
+    in "%(\$1:CMD:X)f %(\$1:CMD:Y)f %(\$1:CMD:Z)f %(\$1:CMD:RX)f %(\$1:CMD:RY)f %(\$1:CMD:RZ)f";
 }
 
 move_mm {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     # Append m to indicate mm positions
-    out "mov %(\$1{\$2-Ax:1}Pos-SP)gm %(\$1{\$2-Ax:2}Pos-SP)gm %(\$1{\$2-Ax:3}Pos-SP)gm %(\$1{\$2-Ax:1}Rot-SP)g %(\$1{\$2-Ax:2}Rot-SP)g %(\$1{\$2-Ax:3}Rot-SP)g";
+    out "mov %(\$1:CMD:X)gm %(\$1:CMD:Y)gm %(\$1:CMD:Z)gm %(\$1:CMD:RX)g %(\$1:CMD:RY)g %(\$1:CMD:RZ)g";
     in "!0";
 }
 
 reachable_mm {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     # Append m to indicate mm positions
-    out "rea? %(\$1{\$2-Ax:1}Pos-SP)gm %(\$1{\$2-Ax:2}Pos-SP)gm %(\$1{\$2-Ax:3}Pos-SP)gm %(\$1{\$2-Ax:1}Rot-SP)g %(\$1{\$2-Ax:2}Rot-SP)g %(\$1{\$2-Ax:3}Rot-SP)g";
-    in "%(\$1{\$2}Reach-I)d";
+    out "rea? %(\$1:CMD:X)gm %(\$1:CMD:Y)gm %(\$1:CMD:Z)gm %(\$1:CMD:RX)g %(\$1:CMD:RY)g %(\$1:CMD:RZ)g";
+    in "%(\$1:REACHABLE)d";
 }
 
 # Referencing
@@ -87,7 +91,7 @@ async_ref_response {
 }
 
 reference {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     # Referencing can take a long time
     # If we fail to get a reply within that time, responses will become confused
@@ -100,8 +104,72 @@ reference {
     in "!0";
 }
 
+get_ref_method {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Retrieve current set reference method
+    out "get fref-method";
+    in "%s";
+}
+
+set_ref_method {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Set reference method
+    out "set fref-method %s";
+    in "!0";
+}
+
+get_ref_x {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Retrieve current set reference method
+    out "get fref-x-direction";
+    in "%s";
+}
+
+set_ref_x {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Set reference method
+    out "set fref-x-direction %s";
+    in "!0";
+}
+
+get_ref_y {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Retrieve current set reference method
+    out "get fref-y-direction";
+    in "%s";
+}
+
+set_ref_y {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Set reference method
+    out "set fref-y-direction %s";
+    in "!0";
+}
+
+get_ref_z {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Retrieve current set reference method
+    out "get fref-z-direction";
+    in "%s";
+}
+
+set_ref_z {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+
+    #Set reference method
+    out "set fref-z-direction %s";
+    in "!0";
+}
+
 calibrate {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
 
     # Calibration can take a long time
     # If we fail to get a reply within that time, responses will become confused
@@ -116,58 +184,93 @@ calibrate {
 
 # Version information
 read_version {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
-    out "\%info version";
-    in "Versions:";
-    in "  SmarAct Embedded Controller %(\$1{\$2}Ver:Sys)" $valid_chars;
-    in "  MCS library%(\$1{\$2}Ver:Mcs)" $valid_chars;
-    in "  SmarPod library: %(\$1{\$2}Ver:SPod)" $valid_chars;
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    out "\%info device";
+    in "Device Serial Number: %(\$1:VER:SN)" $valid_chars;
+    in "Device Product Code: %(\$1:VER:PRODUCT)" $valid_chars;
+    in "Firmware Version: %(\$1:VER:FIRMWARE)" $valid_chars;
 }
 
 read_status {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
     out "\%info status";
-    in "Status: %(\$1{\$2}Sts)" $valid_chars;
-    in "System Time: %(\$1{\$2}Sts:Uptime)" $valid_chars;
-    in "Temperature: %(\$1{\$2}Sts:Temp)f";
-    in "CPU Load: %(\$1{\$2}Sts:Load)f";
-    in "Network IO: %(\$1{\$2}Sts:Net)" $valid_chars "(%(\$1{\$2}Sts:NetIn)d bytes read, %(\$1{\$2}Sts:NetOut)d bytes written, %(\$1{\$2}Sts:Conn)d connections)";
-    in "IP address: %(\$1{\$2}Sts:Ip)" $valid_chars;
-    in "Connected network client: %(\$1{\$2}Sts:ClientIP)" $valid_chars;
-    in "Serial IO: %(\$1{\$2}Sts:Ser)" $valid_chars "(%(\$1{\$2}Sts:SerIn)d bytes read, %(\$1{\$2}Sts:SerOut)d bytes written)";
-    in "Low-Level: %(\$1{\$2}Sts:LowLevel)" $valid_chars;
+    in "Status: %(\$1:STATUS:STATUS)" $valid_chars;
+    in "Bootcount: %(\$1:STATUS:BOOTCNT)d";
+    in "Uptime: %(\$1:STATUS:UPTIME)" $valid_chars;
+    in "CPU Temperature: %(\$1:STATUS:TEMP)f degrees Celsius";
+    in "CPU Load: %(\$1:STATUS:LOAD)f%%";
+    in "Memory Available: %(\$1:STATUS:MEMORY)f%%";
+    in "Network IO: %(\$1:STATUS:NET)" $valid_chars "(%(\$1:STATUS:NET_BYTES_IN)d bytes read, %(\$1:STATUS:NET_BYTES_OUT)d bytes written)";
+    in "IP Address: %(\$1:STATUS:IP)" $valid_chars;
+    in "Connected Network Client: %(\$1:STATUS:CLIENT_IP)" $valid_chars;
+    in "Serial IO: %(\$1:STATUS:SER_STATUS)" $valid_chars "(%(\$1:STATUS:SER_BYTES_IN)d bytes read, %(\$1:STATUS:SER_BYTES_OUT)d bytes written)";
+    in "Display: %(\$1:STATUS:DISPLAY)" $valid_chars;
 }
 
 # Generic
 read_int {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
-    out "\$3?";
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    out "\$2?";
     in "%d";
 }
 
 set_int {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
-    out "\$3 %d";
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    out "\$2 %d";
+    in "!0";
+}
+
+set_int_init {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    @init { out "\$2?"; in "%d"; }
+    out "\$2 %d";
     in "!0";
 }
 
 read_float {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
-    out "\$3?";
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    out "\$2?";
     in "%f";
 }
 
 set_float {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
-    out "\$3 %f";
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    out "\$2 %f";
+    in "!0";
+}
+set_float_init {
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    @init { out "\$2?"; in "%f"; }
+    out "\$2 %f";
     in "!0";
 }
 simple_cmd {
-    @mismatch { in "!%(\$1{\$2}Err-I)d"; }
-    out "\$3";
+    @mismatch { in "!%(\$1:ERROR_CODE)d"; }
+    out "\$2";
     in "!0";
 }
 
+# The New World Order:
+#
+# %info device
+# Device Serial Number: ECM.00000056
+# Device Product Code: ECM-V2.0-RACK
+# Firmware Version: 2.2.1
+#
+# %info status
+# Status: ready
+# Bootcount: 23
+# Uptime: 7d:1h:2032s
+# CPU Temperature: 35.00 degrees Celsius
+# CPU Load: 1.00%
+# Memory Available: 97.8%
+# Network IO: ok (160147 bytes read, 1248166 bytes written)
+# IP Address: 172.21.140.96
+# Connected Network Client: 172.21.140.35
+# Serial IO: ok (0 bytes read, 0 bytes written)
+# Display: ok
+
+# The Ancien Regime:
 #
 # %info status
 # Status: ready

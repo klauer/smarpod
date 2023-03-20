@@ -1,483 +1,396 @@
-record(bo, "$(Sys){$(Dev)}Init-Cmd") {
+record(bo, "$(BASE):CMD:INIT") {
     field(DESC, "(setup EOL and number format)")
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto initialize_smarpod($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto initialize_smarpod($(BASE)) $(DEV)")
     field(PINI, "YES")
     field(SCAN, "Passive")
-    field(FLNK, "$(Sys){$(Dev)}AllSts-Cmd")
+    field(FLNK, "$(BASE):CMD:ALL_STATUS")
 }
 
-record(fanout, "$(Sys){$(Dev)}AllSts-Cmd") {
-    field(LNK1, "$(Sys){$(Dev)}Unit-I")
-    field(LNK2, "$(Sys){$(Dev)}ReadVer-Cmd")
-    field(LNK3, "$(Sys){$(Dev)}ReadSts-Cmd")
+record(fanout, "$(BASE):CMD:ALL_STATUS") {
+    field(LNK1, "$(BASE):UNIT")
+    field(LNK2, "$(BASE):CMD:READ_VER")
+    field(LNK3, "$(BASE):CMD:READ_STATUS")
 }
 
 # Controlling unit number
-record(ao, "$(Sys){$(Dev)}Unit-SP") {
+record(ao, "$(BASE):CMD:UNIT") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto set_int($(Sys),$(Dev),\\%unit) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto set_int_init($(BASE),\\%unit) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
-    field(FLNK, "$(Sys){$(Dev)}Unit-I")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "")
+    field(FLNK, "$(BASE):UNIT")
+    info(autosaveFields, "VAL")
 }
 
-record(ai, "$(Sys){$(Dev)}Unit-I")
+record(ai, "$(BASE):UNIT")
 {
     field(DESC, "Selected SmarPod unit")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_int($(Sys),$(Dev),\\%unit) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto read_int($(BASE),\\%unit) $(DEV)")
     field(SCAN, "Passive")
 }
 
 # Reference
-record(bo, "$(Sys){$(Dev)}Ref-Cmd") {
+record(bo, "$(BASE):CMD:REF") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto reference($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto reference($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(ZNAM, "Reference")
     field(ONAM, "Reference")
 }
 
-record(bi, "$(Sys){$(Dev)}Ref-I")
+record(bi, "$(BASE):REF")
 {
     field(DESC, "Readback referenced state")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_int($(Sys),$(Dev),ref) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto read_int($(BASE),ref) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "1 second")
     field(ZNAM, "Unreferenced")
     field(ONAM, "Referenced")
 }
 
-record(ai, "$(Sys){$(Dev)}ARef-I")
+record(ai, "$(BASE):_REF")
 {
     field(DESC, "Async reference response")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto async_ref_response($(Sys),$(Dev)) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto async_ref_response($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "I/O Intr")
+    field(TPRO, 1)
+}
+
+record(mbbo, "$(BASE):CMD:REF_METHOD")
+{
+    field(DESC, "Set reference method")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(OUT,  "@SmarPod.proto set_ref_method($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "default")
+    field(ONST, "sequential")
+    field(TWST, "z-safe")
+    field(THST, "xy-safe")
+    field(FLNK, "$(BASE):REF_METHOD")
+}
+
+record(mbbi, "$(BASE):REF_METHOD")
+{
+    field(DESC, "Readback reference method")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(INP,  "@SmarPod.proto get_ref_method($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "default")
+    field(ONST, "sequential")
+    field(TWST, "z-safe")
+    field(THST, "xy-safe")
+}
+
+record(mbbo, "$(BASE):CMD:REF_X_DIRECT")
+{
+    field(DESC, "Set reference x-direction")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(OUT,  "@SmarPod.proto set_ref_x($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "default")
+    field(ONST, "pos")
+    field(TWST, "neg")
+    field(THST, "pos-reverse")
+    field(FRST, "neg-reverse")
+    field(FLNK, "$(BASE):REF_X_DIRECT")
+}
+
+record(mbbi, "$(BASE):REF_X_DIRECT")
+{
+    field(DESC, "Readback reference x-direction")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(INP,  "@SmarPod.proto get_ref_x($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "default")
+    field(ONST, "pos")
+    field(TWST, "neg")
+    field(THST, "pos-reverse")
+    field(FRST, "neg-reverse")
+}
+
+record(mbbo, "$(BASE):CMD:REF_Y_DIRECT")
+{
+    field(DESC, "Set reference y-direction")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(OUT,  "@SmarPod.proto set_ref_y($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "default")
+    field(ONST, "pos")
+    field(TWST, "neg")
+    field(THST, "pos-reverse")
+    field(FRST, "neg-reverse")
+    field(FLNK, "$(BASE):REF_Y_DIRECT")
+}
+
+record(mbbi, "$(BASE):REF_Y_DIRECT")
+{
+    field(DESC, "Readback reference y-direction")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(INP,  "@SmarPod.proto get_ref_y($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "default")
+    field(ONST, "pos")
+    field(TWST, "neg")
+    field(THST, "pos-reverse")
+    field(FRST, "neg-reverse")
+}
+
+record(mbbo, "$(BASE):CMD:REF_Z_DIRECT")
+{
+    field(DESC, "Set reference z-direction")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(OUT,  "@SmarPod.proto set_ref_z($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "default")
+    field(ONST, "pos")
+    field(TWST, "neg")
+    field(THST, "pos-reverse")
+    field(FRST, "neg-reverse")
+    field(FLNK, "$(BASE):REF_Z_DIRECT")
+}
+
+record(mbbi, "$(BASE):REF_Z_DIRECT")
+{
+    field(DESC, "Readback reference z-direction")
+    field(DTYP, "stream")
+    field(PINI, "NO")
+    field(INP,  "@SmarPod.proto get_ref_z($(BASE)) $(DEV)")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "default")
+    field(ONST, "pos")
+    field(TWST, "neg")
+    field(THST, "pos-reverse")
+    field(FRST, "neg-reverse")
 }
 
 # Positions - Move
-record(bo, "$(Sys){$(Dev)}Move-Cmd")
+record(bo, "$(BASE):CMD:MOVE")
 {
-    field(ZNAM, "Move")
-    field(ONAM, "Move")
-    field(FLNK, "$(Sys){$(Dev)}Move-Seq_")
-}
-
-record(seq, "$(Sys){$(Dev)}Move-Seq_")
-{
-    # Disable updating motion polling
-    field(LNK1, "$(Sys){$(Dev)}MotionRequest_ PP")
-    field(DOL1, "1")
-    
-    # Set the busy record after polling has definitely stopped
-    # field(DLY2, "0.05")
-    field(LNK2, "$(Sys){$(Dev)}BusyMoving_ PP")
-    field(DOL2, "1")
-
-    # Start the motion
-    field(LNK3, "$(Sys){$(Dev)}Move-Cmd_ PP")
-    field(DOL3, "1")
-
-    # Re-enable motion status polling (after 200ms)
-    field(DLY4, "0.2")
-    field(LNK4, "$(Sys){$(Dev)}MotionRequest_ PP")
-    field(DOL4, "0")
-}
-
-record(busy, "$(Sys){$(Dev)}BusyMoving_")
-{
-    field(DESC, "Allows put completion with Move-Cmd")
-    field(VAL, 0)
-    field(PINI, "YES")
-}
-
-record(bo, "$(Sys){$(Dev)}Move-Cmd_")
-{
-    field(DESC, "Move to a position")
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto move_mm($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto move_mm($(BASE)) $(DEV)")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:1}Pos-SP")
+record(ao, "$(BASE):CMD:X")
 {
     field(PREC, "6")
     field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:1}TwkPos-SP")
-{
-    field(DESC, "Position tweak value")
-    field(PREC, "3")
-    field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "VAL")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:1}TwkPos-Cmd")
-{
-    field(DESC, "Tweak positive Ax:1")
-    field(INPA, "$(Sys){$(Dev)-Ax:1}Pos-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:1}TwkPos-SP NPP")
-    field(CALC, "A + B")
-    field(OUT, "$(Sys){$(Dev)-Ax:1}Pos-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:1}TwkNeg-Cmd")
-{
-    field(DESC, "Tweak negative Ax:1")
-    field(INPA, "$(Sys){$(Dev)-Ax:1}Pos-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:1}TwkPos-SP NPP")
-    field(CALC, "A - B")
-    field(OUT, "$(Sys){$(Dev)-Ax:1}Pos-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(ao, "$(Sys){$(Dev)-Ax:2}Pos-SP")
+record(ao, "$(BASE):CMD:Y")
 {
     field(PREC, "6")
     field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:2}TwkPos-SP")
-{
-    field(DESC, "Position tweak value")
-    field(PREC, "3")
-    field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "VAL")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:2}TwkPos-Cmd")
-{
-    field(DESC, "Tweak positive Ax:2")
-    field(INPA, "$(Sys){$(Dev)-Ax:2}Pos-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:2}TwkPos-SP NPP")
-    field(CALC, "A + B")
-    field(OUT, "$(Sys){$(Dev)-Ax:2}Pos-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:2}TwkNeg-Cmd")
-{
-    field(DESC, "Tweak negative Ax:2")
-    field(INPA, "$(Sys){$(Dev)-Ax:2}Pos-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:2}TwkPos-SP NPP")
-    field(CALC, "A - B")
-    field(OUT, "$(Sys){$(Dev)-Ax:2}Pos-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(ao, "$(Sys){$(Dev)-Ax:3}Pos-SP")
+record(ao, "$(BASE):CMD:Z")
 {
     field(PREC, "6")
     field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:3}TwkPos-SP")
-{
-    field(DESC, "Position tweak value")
-    field(PREC, "3")
-    field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "VAL")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:3}TwkPos-Cmd")
-{
-    field(DESC, "Tweak positive Ax:3")
-    field(INPA, "$(Sys){$(Dev)-Ax:3}Pos-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:3}TwkPos-SP NPP")
-    field(CALC, "A + B")
-    field(OUT, "$(Sys){$(Dev)-Ax:3}Pos-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:3}TwkNeg-Cmd")
-{
-    field(DESC, "Tweak negative Ax:3")
-    field(INPA, "$(Sys){$(Dev)-Ax:3}Pos-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:3}TwkPos-SP NPP")
-    field(CALC, "A - B")
-    field(OUT, "$(Sys){$(Dev)-Ax:3}Pos-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(ao, "$(Sys){$(Dev)-Ax:1}Rot-SP")
+record(ao, "$(BASE):CMD:RX")
 {
     field(PREC, "6")
     field(EGU, "deg")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:1}TwkRot-SP")
-{
-    field(DESC, "Rotation tweak value")
-    field(PREC, "3")
-    field(EGU, "deg")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "VAL")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:1}TwkRotPos-Cmd")
-{
-    field(DESC, "Tweak Rotitive Ax:1")
-    field(INPA, "$(Sys){$(Dev)-Ax:1}Rot-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:1}TwkRot-SP NPP")
-    field(CALC, "A + B")
-    field(OUT, "$(Sys){$(Dev)-Ax:1}Rot-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:1}TwkRotNeg-Cmd")
-{
-    field(DESC, "Tweak negative Ax:1")
-    field(INPA, "$(Sys){$(Dev)-Ax:1}Rot-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:1}TwkRot-SP NPP")
-    field(CALC, "A - B")
-    field(OUT, "$(Sys){$(Dev)-Ax:1}Rot-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(ao, "$(Sys){$(Dev)-Ax:2}Rot-SP")
+record(ao, "$(BASE):CMD:RY")
 {
     field(PREC, "6")
     field(EGU, "deg")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:2}TwkRot-SP")
-{
-    field(DESC, "Rotation tweak value")
-    field(PREC, "3")
-    field(EGU, "deg")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "VAL")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:2}TwkRotPos-Cmd")
-{
-    field(DESC, "Tweak Rotitive Ax:2")
-    field(INPA, "$(Sys){$(Dev)-Ax:2}Rot-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:2}TwkRot-SP NPP")
-    field(CALC, "A + B")
-    field(OUT, "$(Sys){$(Dev)-Ax:2}Rot-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:2}TwkRotNeg-Cmd")
-{
-    field(DESC, "Tweak negative Ax:2")
-    field(INPA, "$(Sys){$(Dev)-Ax:2}Rot-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:2}TwkRot-SP NPP")
-    field(CALC, "A - B")
-    field(OUT, "$(Sys){$(Dev)-Ax:2}Rot-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(ao, "$(Sys){$(Dev)-Ax:3}Rot-SP")
+record(ao, "$(BASE):CMD:RZ")
 {
     field(PREC, "6")
     field(EGU, "deg")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
-
-record(ao, "$(Sys){$(Dev)-Ax:3}TwkRot-SP")
-{
-    field(DESC, "Rotation tweak value")
-    field(PREC, "3")
-    field(EGU, "deg")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "VAL")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:3}TwkRotPos-Cmd")
-{
-    field(DESC, "Tweak Rotitive Ax:3")
-    field(INPA, "$(Sys){$(Dev)-Ax:3}Rot-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:3}TwkRot-SP NPP")
-    field(CALC, "A + B")
-    field(OUT, "$(Sys){$(Dev)-Ax:3}Rot-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
-record(calcout, "$(Sys){$(Dev)-Ax:3}TwkRotNeg-Cmd")
-{
-    field(DESC, "Tweak negative Ax:3")
-    field(INPA, "$(Sys){$(Dev)-Ax:3}Rot-SP NPP")
-    field(INPB, "$(Sys){$(Dev)-Ax:3}TwkRot-SP NPP")
-    field(CALC, "A - B")
-    field(OUT, "$(Sys){$(Dev)-Ax:3}Rot-SP PP")
-    field(FLNK, "$(Sys){$(Dev)}Move-Cmd.PROC")
-}
-
 
 # Stop
-record(bo, "$(Sys){$(Dev)}Stop-Cmd")
+record(bo, "$(BASE):CMD:STOP")
 {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto simple_cmd($(Sys),$(Dev),stop) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto simple_cmd($(BASE),stop) $(DEV)")
     field(ZNAM, "Stop")
     field(ONAM, "Stop")
 }
 
 # Pose reachable?
-record(bo, "$(Sys){$(Dev)}Reach-Cmd")
+record(bo, "$(BASE):CMD:REACHABLE")
 {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto reachable_mm($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto reachable_mm($(BASE)) $(DEV)")
     field(ZNAM, "Check pose")
     field(ONAM, "Check pose")
 }
 
-record(bi, "$(Sys){$(Dev)}Reach-I")
+record(bi, "$(BASE):REACHABLE")
 {
     field(DTYP, "Soft Channel")
     field(ZNAM, "Unreachable")
     field(ONAM, "Reachable")
+    field(VAL,  "1")
+    field(PINI, "YES")
     field(ZSV, "MINOR")
 }
 
 # Positions - Readback
-record(bo, "$(Sys){$(Dev)}PosRbv-Cmd") {
+record(bo, "$(BASE):CMD:POS_RBV") {
   field(DESC, "Readback current pose position")
   field(VAL, "0")
   field(DTYP, "stream")
-  field(OUT,  "@devSmarPod.proto read_pos($(Sys),$(Dev)) $(PORT) $(A)")
+  field(OUT,  "@SmarPod.proto read_pos($(BASE)) $(DEV)")
   field(PINI, "NO")
   field(SCAN, ".1 second")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:1}Pos_")
+record(ai, "$(BASE):X_M")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "m")
-    field(FLNK, "$(Sys){$(Dev)-Ax:1}Pos-I")
+    field(FLNK, "$(BASE):X")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:2}Pos_")
+record(ai, "$(BASE):Y_M")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "m")
-    field(FLNK, "$(Sys){$(Dev)-Ax:2}Pos-I")
+    field(FLNK, "$(BASE):Y")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:3}Pos_")
+record(ai, "$(BASE):Z_M")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "m")
-    field(FLNK, "$(Sys){$(Dev)-Ax:3}Pos-I")
+    field(FLNK, "$(BASE):Z")
 }
 
-record(calc, "$(Sys){$(Dev)-Ax:1}Pos-I")
+record(calc, "$(BASE):X")
 {
-    field(INPA, "$(Sys){$(Dev)-Ax:1}Pos_ NPP MS")
+    field(INPA, "$(BASE):X_M NPP MS")
     field(CALC, "A * 1000")
     field(PREC, "5")
     field(EGU, "mm")
+    field(MDEL, "1e-3")
 }
 
-record(calc, "$(Sys){$(Dev)-Ax:2}Pos-I")
+record(calc, "$(BASE):Y")
 {
-    field(INPA, "$(Sys){$(Dev)-Ax:2}Pos_ NPP MS")
+    field(INPA, "$(BASE):Y_M NPP MS")
     field(CALC, "A * 1000")
     field(PREC, "5")
     field(EGU, "mm")
+    field(MDEL, "1e-3")
 }
 
-record(calc, "$(Sys){$(Dev)-Ax:3}Pos-I")
+record(calc, "$(BASE):Z")
 {
-    field(INPA, "$(Sys){$(Dev)-Ax:3}Pos_ NPP MS")
+    field(INPA, "$(BASE):Z_M NPP MS")
     field(CALC, "A * 1000")
     field(PREC, "5")
     field(EGU, "mm")
+    field(MDEL, "1e-3")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:1}Rot-I")
+record(ai, "$(BASE):RX")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "deg")
+    field(MDEL, "1e-3")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:2}Rot-I")
+record(ai, "$(BASE):RY")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "deg")
+    field(MDEL, "1e-3")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:3}Rot-I")
+record(ai, "$(BASE):RZ")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "deg")
+    field(MDEL, "1e-3")
 }
 
 # Movement - readback
-record(longin, "$(Sys){$(Dev)}MovingRaw-I_")
-{
-    field(VAL, "0")
-    field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_int($(Sys),$(Dev),mst) $(PORT) $(A)")
-    field(PINI, "NO")
-    field(SCAN, ".2 second")
-}
-
-record(calc, "$(Sys){$(Dev)}Moving-I_") {
-    field(SCAN, "Passive")
-    field(INPA, "$(Sys){$(Dev)}MovingRaw-I_ CP MS")
-    field(INPB, "$(Sys){$(Dev)}MotionRequest_ CP MS")
-
-    # If a motion request is happening, report 'moving' as the status.
-    # Otherwise, get the motion status from the device.
-    field(CALC, "(B=1) ? 2 : A")
-}
-
-record(bo, "$(Sys){$(Dev)}MotionRequest_") {
-    field(VAL, "0")
-    field(PINI, "YES")
-}
-
-record(mbbi, "$(Sys){$(Dev)}Moving-I")
+record(mbbi, "$(BASE):MOVING")
 {
     field(DESC, "Movement status")
-    field(PINI, "YES")
-    field(INP,  "$(Sys){$(Dev)}Moving-I_ CP MS")
-    field(SCAN, "Passive")
     field(VAL, "0")
+    field(DTYP, "stream")
+    field(INP,  "@SmarPod.proto read_int($(BASE),mst) $(DEV)")
+    field(PINI, "NO")
+    field(SCAN, ".2 second")
     field(ZRVL, 0)
     field(ONVL, 1)
     field(TWVL, 2)
@@ -487,42 +400,21 @@ record(mbbi, "$(Sys){$(Dev)}Moving-I")
     field(TWST, "Moving")
 }
 
-record(calcout, "$(Sys){$(Dev)}MotionInProgress_") {
-    field(PINI, "YES")
-    field(SCAN, "Passive")
-
-    field(INPA, "$(Sys){$(Dev)}Moving-I CP")
-    # motion_in_progress = (moving_status == moving[2])
-    # when motion_in_progress transitions to 0, moving status was 'moving',
-    # then it went to something else.
-    field(CALC, "A=2")
-    field(OOPT, "Transition To Zero")
-    field(OUT, "$(Sys){$(Dev)}BusyMoving_ PP")
-}
-
 # Movement - sync
-record(seq, "$(Sys){$(Dev)}SyncAll-Cmd") {
-    field(LNK1, "$(Sys){$(Dev)}Sync-Cmd.PROC")
-    field(LNK2, "$(Sys){$(Dev)}PvtSync-Cmd.PROC")
-    field(LNK3, "$(Sys){$(Dev)}FreqSync_.PROC")
-    field(LNK4, "$(Sys){$(Dev)}VelSync_.PROC")
-    field(LNK5, "$(Sys){$(Dev)}AccelSync_.PROC")
-    field(LNK6, "$(Sys){$(Dev)}PvtModeSync_.PROC")
-}
-
-record(bo, "$(Sys){$(Dev)}Sync-Cmd") {
+record(bo, "$(BASE):CMD:SYNC") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto sync_mm($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto sync_mm($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(ZNAM, "Sync")
     field(ONAM, "Sync")
 }
 
-record(longin, "$(Sys){$(Dev)}Err-I")
+record(longin, "$(BASE):ERROR_CODE")
 {
     field(DTYP, "Soft Channel")
-    field(FLNK, "$(Sys){$(Dev)}ErrDesc-I")
+    field(FLNK, "$(BASE):ERROR_DESC")
+    field(PINI, "YES")
     field(LOW, 0)
     field(HIGH, 0)
     field(LSV, "MINOR")
@@ -530,47 +422,47 @@ record(longin, "$(Sys){$(Dev)}Err-I")
     #field(LOLO, 0)
     #field(HIHI, 0)
 }
-record(stringin, "$(Sys){$(Dev)}ErrDesc-I")
+record(stringin, "$(BASE):ERROR_DESC")
 {
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto check_error($(Sys),$(Dev)) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto check_error($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
 }
 
 
 # Pivot-point
-record(bo, "$(Sys){$(Dev)}PvtRbv-Cmd") {
+record(bo, "$(BASE):CMD:PIVOT_RBV") {
   field(DESC, "Readback pivot point")
   field(VAL, "0")
   field(DTYP, "stream")
-  field(OUT,  "@devSmarPod.proto read_pivot($(Sys),$(Dev)) $(PORT) $(A)")
+  field(OUT,  "@SmarPod.proto read_pivot($(BASE)) $(DEV)")
   field(PINI, "YES")
   field(SCAN, "Passive")
 }
 
-record(bo, "$(Sys){$(Dev)}Pvt-Cmd")
+record(bo, "$(BASE):CMD:SET_PIVOT")
 {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto set_pivot_mm($(Sys),$(Dev)) $(PORT) $(A)")
-    field(FLNK, "$(Sys){$(Dev)}PvtRbv-Cmd")
+    field(OUT,  "@SmarPod.proto set_pivot_mm($(BASE)) $(DEV)")
+    field(FLNK, "$(BASE):CMD:PIVOT_RBV")
 }
 
-record(bo, "$(Sys){$(Dev)}PvtSync-Cmd") {
+record(bo, "$(BASE):CMD:SYNC_PIVOT") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto sync_pivot_mm($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto sync_pivot_mm($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(ZNAM, "Sync")
     field(ONAM, "Sync")
 }
 
-record(mbbo, "$(Sys){$(Dev)}PvtMode-Cmd") {
+record(mbbo, "$(BASE):CMD:PIVOT_MODE") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto set_int($(Sys),$(Dev),pvm) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto set_int($(BASE),pvm) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
-    field(FLNK, "$(Sys){$(Dev)}PvtMode-I")
+    field(FLNK, "$(BASE):PIVOT_MODE")
     field(ZRVL, 0)
     field(ONVL, 1)
 
@@ -578,12 +470,12 @@ record(mbbo, "$(Sys){$(Dev)}PvtMode-Cmd") {
     field(ONST, "Fixed")
 }
 
-record(mbbi, "$(Sys){$(Dev)}PvtMode-I")
+record(mbbi, "$(BASE):PIVOT_MODE")
 {
     field(DESC, "Pivot mode")
     field(VAL, "0")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_int($(Sys),$(Dev),pvm) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto read_int($(BASE),pvm) $(DEV)")
     field(PINI, "YES")
     field(SCAN, "Passive")
     field(ZRVL, 0)
@@ -593,206 +485,186 @@ record(mbbi, "$(Sys){$(Dev)}PvtMode-I")
     field(ONST, "Fixed")
 }
 
-record(longout, "$(Sys){$(Dev)}PvtModeSync_")
-{
-    field(DOL,  "$(Sys){$(Dev)}PvtMode-I NPP")
-    field(OMSL, "closed_loop")
-    field(OUT,  "$(Sys){$(Dev)}PvtMode-Cmd NPP")
-}
-
 # Pivot positions
-record(ai, "$(Sys){$(Dev)-Ax:1}Piv_")
+record(ai, "$(BASE):PX_M")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "m")
-    field(FLNK, "$(Sys){$(Dev)-Ax:1}Piv-I")
+    field(FLNK, "$(BASE):PX")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:2}Piv_")
+record(ai, "$(BASE):PY_M")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "m")
-    field(FLNK, "$(Sys){$(Dev)-Ax:2}Piv-I")
+    field(FLNK, "$(BASE):PY")
 }
 
-record(ai, "$(Sys){$(Dev)-Ax:3}Piv_")
+record(ai, "$(BASE):PZ_M")
 {
     field(DTYP, "Soft Channel")
     field(PREC, "5")
     field(EGU, "m")
-    field(FLNK, "$(Sys){$(Dev)-Ax:3}Piv-I")
+    field(FLNK, "$(BASE):PZ")
 }
 
-record(calc, "$(Sys){$(Dev)-Ax:1}Piv-I")
+record(calc, "$(BASE):PX")
 {
-    field(INPA, "$(Sys){$(Dev)-Ax:1}Piv_ NPP MS")
+    field(INPA, "$(BASE):PX_M NPP MS")
     field(CALC, "A * 1000")
     field(PREC, "5")
     field(EGU, "mm")
 }
 
-record(calc, "$(Sys){$(Dev)-Ax:2}Piv-I")
+record(calc, "$(BASE):PY")
 {
-    field(INPA, "$(Sys){$(Dev)-Ax:2}Piv_ NPP MS")
+    field(INPA, "$(BASE):PY_M NPP MS")
     field(CALC, "A * 1000")
     field(PREC, "5")
     field(EGU, "mm")
 }
 
-record(calc, "$(Sys){$(Dev)-Ax:3}Piv-I")
+record(calc, "$(BASE):PZ")
 {
-    field(INPA, "$(Sys){$(Dev)-Ax:3}Piv_ NPP MS")
+    field(INPA, "$(BASE):PZ_M NPP MS")
     field(CALC, "A * 1000")
     field(PREC, "5")
     field(EGU, "mm")
 }
 
 # Pivot request positions
-record(ao, "$(Sys){$(Dev)-Ax:1}Piv-SP")
+record(ao, "$(BASE):CMD:PX")
 {
     field(PREC, "6")
     field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:2}Piv-SP")
+record(ao, "$(BASE):CMD:PY")
 {
     field(PREC, "6")
     field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
-record(ao, "$(Sys){$(Dev)-Ax:3}Piv-SP")
+record(ao, "$(BASE):CMD:PZ")
 {
     field(PREC, "6")
     field(EGU, "mm")
-
-    info(autosaveFields_pass0, "VAL")
+    field(PINI, "YES")
     info(autosaveFields, "VAL")
 }
 
 # Miscellaneous
-record(bo, "$(Sys){$(Dev)}Calib-Cmd") {
+record(bo, "$(BASE):CMD:CALIBRATE") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto calibrate($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto calibrate($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(ZNAM, "Calibrate")
     field(ONAM, "Calibrate")
 }
 
-record(bo, "$(Sys){$(Dev)}ReadVer-Cmd") {
+record(bo, "$(BASE):CMD:READ_VER") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto read_version($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto read_version($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(ZNAM, "Read version")
     field(ONAM, "Read version")
 }
 
-record(stringin, "$(Sys){$(Dev)}Ver:Sys") {
+record(stringin, "$(BASE):VER:SYS") {
     field(DTYP, "Soft Channel")
 }
 
-# Version
-record(stringin, "$(Sys){$(Dev)}Ver:Mcs") {
+# Device info
+record(stringin, "$(BASE):VER:SN") {
     field(DTYP, "Soft Channel")
 }
 
-record(stringin, "$(Sys){$(Dev)}Ver:SPod") {
+record(stringin, "$(BASE):VER:PRODUCT") {
     field(DTYP, "Soft Channel")
 }
 
-record(stringin, "$(Sys){$(Dev)}Ver:SmarPod") {
+record(stringin, "$(BASE):VER:FIRMWARE") {
     field(DTYP, "Soft Channel")
 }
 
 # Status
-record(bo, "$(Sys){$(Dev)}ReadSts-Cmd") {
+record(bo, "$(BASE):CMD:READ_STATUS") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto read_status($(Sys),$(Dev)) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto read_status($(BASE)) $(DEV)")
     field(PINI, "NO")
     field(ZNAM, "Read status")
     field(ONAM, "Read status")
     field(SCAN, "10 second")
 }
 
-record(ai, "$(Sys){$(Dev)}Sts:Temp") {
-    field(DESC, "Temperature")
+record(ai, "$(BASE):STATUS:TEMP") {
     field(DTYP, "Soft Channel")
     field(EGU, "C")
 }
-record(ai, "$(Sys){$(Dev)}Sts:Load") {
-    field(DESC, "System load")
+record(ai, "$(BASE):STATUS:LOAD") {
     field(DTYP, "Soft Channel")
-    field(EGU, "\%")
+    field(EGU, "%")
 }
-record(ai, "$(Sys){$(Dev)}Sts:NetIn") {
-    field(DESC, "Network input")
+record(ai, "$(BASE):STATUS:MEMORY") {
     field(DTYP, "Soft Channel")
-    field(EGU, "bytes")
+    field(EGU, "%")
 }
-record(ai, "$(Sys){$(Dev)}Sts:NetOut") {
-    field(DESC, "Network output")
+record(ai, "$(BASE):STATUS:NET_BYTES_IN") {
     field(DTYP, "Soft Channel")
     field(EGU, "bytes")
 }
-record(stringin, "$(Sys){$(Dev)}Sts:Net") {
-    field(DESC, "Network")
-    field(DTYP, "Soft Channel")
-}
-record(stringin, "$(Sys){$(Dev)}Sts") {
-    field(DESC, "Device status")
-    field(DTYP, "Soft Channel")
-}
-record(stringin, "$(Sys){$(Dev)}Sts:Uptime") {
-    field(DESC, "Uptime")
-    field(DTYP, "Soft Channel")
-}
-record(longin, "$(Sys){$(Dev)}Sts:Conn") {
-    field(DESC, "Connections")
-    field(DTYP, "Soft Channel")
-}
-record(stringin, "$(Sys){$(Dev)}Sts:Ip") {
-    field(DESC, "Device IP")
-    field(DTYP, "Soft Channel")
-}
-record(stringin, "$(Sys){$(Dev)}Sts:ClientIP") {
-    field(DESC, "Client IP")
-    field(DTYP, "Soft Channel")
-}
-record(stringin, "$(Sys){$(Dev)}Sts:Ser") {
-    field(DESC, "Serial Status")
-    field(DTYP, "Soft Channel")
-}
-record(ai, "$(Sys){$(Dev)}Sts:SerIn") {
-    field(DESC, "Serial input")
+record(ai, "$(BASE):STATUS:NET_BYTES_OUT") {
     field(DTYP, "Soft Channel")
     field(EGU, "bytes")
 }
-record(ai, "$(Sys){$(Dev)}Sts:SerOut") {
-    field(DESC, "Serial output")
+record(stringin, "$(BASE):STATUS:NET") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(BASE):STATUS:STATUS") {
+    field(DTYP, "Soft Channel")
+}
+record(longin, "$(BASE):STATUS:BOOTCNT") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(BASE):STATUS:UPTIME") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(BASE):STATUS:IP") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(BASE):STATUS:CLIENT_IP") {
+    field(DTYP, "Soft Channel")
+}
+record(stringin, "$(BASE):STATUS:SER_STATUS") {
+    field(DTYP, "Soft Channel")
+}
+record(ai, "$(BASE):STATUS:SER_BYTES_IN") {
     field(DTYP, "Soft Channel")
     field(EGU, "bytes")
 }
-record(stringin, "$(Sys){$(Dev)}Sts:LowLevel") {
-    field(DESC, "Low Level")
+record(ai, "$(BASE):STATUS:SER_BYTES_OUT") {
+    field(DTYP, "Soft Channel")
+    field(EGU, "bytes")
+}
+record(stringin, "$(BASE):STATUS:DISPLAY") {
     field(DTYP, "Soft Channel")
 }
 
 # Sensor mode
-record(mbbo, "$(Sys){$(Dev)}SnsMode-Cmd") {
+record(mbbo, "$(BASE):CMD:SENSOR_MODE") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto set_int($(Sys),$(Dev),sen) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto set_int_init($(BASE),sen) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
-    field(FLNK, "$(Sys){$(Dev)}SnsMode")
+    field(FLNK, "$(BASE):SENSOR_MODE")
     field(ZRVL, 0)
     field(ONVL, 1)
     field(TWVL, 2)
@@ -800,15 +672,15 @@ record(mbbo, "$(Sys){$(Dev)}SnsMode-Cmd") {
     field(ZRST, "Disabled")
     field(ONST, "Enabled")
     field(TWST, "Power-save")
-    field(FLNK, "$(Sys){$(Dev)}SnsMode")
+    field(FLNK, "$(BASE):SENSOR_MODE")
 }
 
-record(mbbi, "$(Sys){$(Dev)}SnsMode")
+record(mbbi, "$(BASE):SENSOR_MODE")
 {
     field(DESC, "Sensor mode")
     field(VAL, "0")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_int($(Sys),$(Dev),sen) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto read_int($(BASE),sen) $(DEV)")
     field(SCAN, "Passive")
     field(PINI, "YES")
     field(ZRVL, 0)
@@ -821,98 +693,572 @@ record(mbbi, "$(Sys){$(Dev)}SnsMode")
 }
 
 # Maximum frequency
-record(ao, "$(Sys){$(Dev)}Freq-SP") {
+record(ao, "$(BASE):CMD:FREQ") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto set_float($(Sys),$(Dev),frq) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto set_float_init($(BASE),frq) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(EGU, "Hz")
     field(PREC, "1")
-    field(FLNK, "$(Sys){$(Dev)}Freq-I")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "")
+    field(FLNK, "$(BASE):FREQ")
 }
 
-record(ai, "$(Sys){$(Dev)}Freq-I")
+record(ai, "$(BASE):FREQ")
 {
     field(DESC, "Maximum frequency")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_float($(Sys),$(Dev),frq) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto read_float($(BASE),frq) $(DEV)")
     field(SCAN, "Passive")
     field(PINI, "YES")
     field(EGU, "Hz")
-    field(VAL, "8000")
+    field(VAL, "5000")
     field(PREC, "1")
 }
 
-record(ao, "$(Sys){$(Dev)}FreqSync_")
-{
-    field(DOL,  "$(Sys){$(Dev)}Freq-I NPP")
-    field(OMSL, "closed_loop")
-    field(OUT,  "$(Sys){$(Dev)}Freq-SP NPP")
-}
-
 # Maximum velocity
-record(ao, "$(Sys){$(Dev)}Vel-SP") {
+record(ao, "$(BASE):CMD:VEL") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto set_float($(Sys),$(Dev),vel) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto set_float_init($(BASE),vel) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(EGU, "m/s")
     field(PREC, "5")
-    field(FLNK, "$(Sys){$(Dev)}Vel-I")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "")
+    field(FLNK, "$(BASE):VEL")
 }
 
-record(ai, "$(Sys){$(Dev)}Vel-I")
+record(ai, "$(BASE):VEL")
 {
     field(DESC, "Velocity")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_float($(Sys),$(Dev),vel) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto read_float($(BASE),vel) $(DEV)")
     field(SCAN, "Passive")
     field(PINI, "YES")
     field(EGU, "m/s")
     field(PREC, "5")
-}
-
-record(ao, "$(Sys){$(Dev)}VelSync_")
-{
-    field(DOL,  "$(Sys){$(Dev)}Vel-I NPP")
-    field(OMSL, "closed_loop")
-    field(OUT,  "$(Sys){$(Dev)}Vel-SP NPP")
+    field(VAL, "1")
 }
 
 # Maximum acceleration
-record(ao, "$(Sys){$(Dev)}Accel-SP") {
+record(ao, "$(BASE):CMD:ACCEL") {
     field(DTYP, "stream")
-    field(OUT,  "@devSmarPod.proto set_float($(Sys),$(Dev),acc) $(PORT) $(A)")
+    field(OUT,  "@SmarPod.proto set_float($(BASE),acc) $(DEV)")
     field(PINI, "NO")
     field(SCAN, "Passive")
     field(EGU, "m/s^2")
     field(PREC, "5")
-    field(FLNK, "$(Sys){$(Dev)}Accel-I")
-
-    info(autosaveFields_pass0, "VAL")
-    info(autosaveFields, "")
+    field(FLNK, "$(BASE):ACCEL")
 }
 
-record(ai, "$(Sys){$(Dev)}Accel-I")
+record(ai, "$(BASE):ACCEL")
 {
     field(DESC, "Acceleration")
     field(DTYP, "stream")
-    field(INP,  "@devSmarPod.proto read_float($(Sys),$(Dev),acc) $(PORT) $(A)")
+    field(INP,  "@SmarPod.proto read_float($(BASE),acc) $(DEV)")
     field(SCAN, "Passive")
     field(PINI, "YES")
     field(EGU, "m/s^2")
     field(PREC, "5")
+    field(VAL, "0.5")
 }
 
-record(ao, "$(Sys){$(Dev)}AccelSync_")
+# Read and Set Poses
+# Pose 1:
+record(stringout, "$(BASE):POSE_1:NAME")
 {
-    field(DOL,  "$(Sys){$(Dev)}Accel-I NPP")
-    field(OMSL, "closed_loop")
-    field(OUT,  "$(Sys){$(Dev)}Accel-SP NPP")
+    field(DTYP, "Soft Channel")
+    field(DESC, "Pose 1 name input")
+    field(FLNK, "$(BASE):POSE_1:NAME_RBV")
 }
+
+record(stringin, "$(BASE):POSE_1:NAME_RBV")
+{
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(BASE):POSE_1:NAME")
+    field(DESC, "Pose 1 name readback")
+}
+
+record(ai, "$(BASE):POSE_1:X")
+{
+    field(DESC, "Pose 1 X Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):X")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_1:Y")
+{
+    field(DESC, "Pose 1 Y Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Y")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_1:Z")
+{
+    field(DESC, "Pose 1 Z Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Z")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_1:RX")
+{
+    field(DESC, "Pose 1 RX Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RX")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_1:RY")
+{
+    field(DESC, "Pose 1 RY Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RY")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_1:RZ")
+{
+    field(DESC, "Pose 1 RZ Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RZ")
+    field(EGU, "mm")
+}
+
+record(fanout, "$(BASE):POSE_1:RECORD")
+{
+    field(DESC, "Fanout record for recording pose")
+    field(SELM, "All")
+    field(LNK1, "$(BASE):POSE_1:X")
+    field(LNK2, "$(BASE):POSE_1:Y")
+    field(LNK3, "$(BASE):POSE_1:Z")
+    field(LNK4, "$(BASE):POSE_1:RX")
+    field(LNK5, "$(BASE):POSE_1:RY")
+    field(LNK6, "$(BASE):POSE_1:RZ")
+}
+
+record(seq, "$(BASE):POSE_1:GO")
+{
+    field(DESC, "Enacts Pose 1 Positions")
+    field(DOL1, "$(BASE):POSE_1:X")
+    field(DOL2, "$(BASE):POSE_1:Y")
+    field(DOL3, "$(BASE):POSE_1:Z")
+    field(DOL4, "$(BASE):POSE_1:RX")
+    field(DOL5, "$(BASE):POSE_1:RY")
+    field(DOL6, "$(BASE):POSE_1:RZ")
+    field(DO7,  "1")
+    field(LNK1, "$(BASE):CMD:X")
+    field(LNK2, "$(BASE):CMD:Y")
+    field(LNK3, "$(BASE):CMD:Z")
+    field(LNK4, "$(BASE):CMD:RX")
+    field(LNK5, "$(BASE):CMD:RY")
+    field(LNK6, "$(BASE):CMD:RZ")
+    field(LNK7, "$(BASE):CMD:MOVE.PROC")
+}
+
+# Pose 2:
+record(stringout, "$(BASE):POSE_2:NAME")
+{
+    field(DTYP, "Soft Channel")
+    field(DESC, "Pose 2 name input")
+    field(FLNK, "$(BASE):POSE_2:NAME_RBV")
+}
+
+record(stringin, "$(BASE):POSE_2:NAME_RBV")
+{
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(BASE):POSE_1:NAME")
+    field(DESC, "Pose 2 name readback")
+}
+
+record(ai, "$(BASE):POSE_2:X")
+{
+    field(DESC, "Pose 2 X Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):X")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_2:Y")
+{
+    field(DESC, "Pose 2 Y Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Y")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_2:Z")
+{
+    field(DESC, "Pose 2 Z Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Z")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_2:RX")
+{
+    field(DESC, "Pose 2 RX Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RX")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_2:RY")
+{
+    field(DESC, "Pose 2 RY Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RY")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_2:RZ")
+{
+    field(DESC, "Pose 2 RZ Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RZ")
+    field(EGU, "mm")
+}
+
+record(fanout, "$(BASE):POSE_2:RECORD")
+{
+    field(DESC, "Fanout record for recording pose")
+    field(SELM, "All")
+    field(LNK1, "$(BASE):POSE_2:X")
+    field(LNK2, "$(BASE):POSE_2:Y")
+    field(LNK3, "$(BASE):POSE_2:Z")
+    field(LNK4, "$(BASE):POSE_2:RX")
+    field(LNK5, "$(BASE):POSE_2:RY")
+    field(LNK6, "$(BASE):POSE_2:RZ")
+}
+
+record(seq, "$(BASE):POSE_2:GO")
+{
+    field(DESC, "Enacts Pose 2 Positions")
+    field(DOL1, "$(BASE):POSE_2:X")
+    field(DOL2, "$(BASE):POSE_2:Y")
+    field(DOL3, "$(BASE):POSE_2:Z")
+    field(DOL4, "$(BASE):POSE_2:RX")
+    field(DOL5, "$(BASE):POSE_2:RY")
+    field(DOL6, "$(BASE):POSE_2:RZ")
+    field(DO7,  "1")
+    field(LNK1, "$(BASE):CMD:X")
+    field(LNK2, "$(BASE):CMD:Y")
+    field(LNK3, "$(BASE):CMD:Z")
+    field(LNK4, "$(BASE):CMD:RX")
+    field(LNK5, "$(BASE):CMD:RY")
+    field(LNK6, "$(BASE):CMD:RZ")
+    field(LNK7, "$(BASE):CMD:MOVE")
+}
+
+# Pose 3:
+record(stringout, "$(BASE):POSE_3:NAME")
+{
+    field(DTYP, "Soft Channel")
+    field(DESC, "Pose 3 name input")
+    field(FLNK, "$(BASE):POSE_3:NAME_RBV")
+}
+
+record(stringin, "$(BASE):POSE_3:NAME_RBV")
+{
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(BASE):POSE_3:NAME")
+    field(DESC, "Pose 3 name readback")
+}
+
+record(ai, "$(BASE):POSE_3:X")
+{
+    field(DESC, "Pose 3 X Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):X")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_3:Y")
+{
+    field(DESC, "Pose 3 Y Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Y")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_3:Z")
+{
+    field(DESC, "Pose 3 Z Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Z")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_3:RX")
+{
+    field(DESC, "Pose 3 RX Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RX")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_3:RY")
+{
+    field(DESC, "Pose 3 RY Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RY")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_3:RZ")
+{
+    field(DESC, "Pose 3 RZ Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RZ")
+    field(EGU, "mm")
+}
+
+record(fanout, "$(BASE):POSE_3:RECORD")
+{
+    field(DESC, "Fanout record for recording pose")
+    field(SELM, "All")
+    field(LNK1, "$(BASE):POSE_3:X")
+    field(LNK2, "$(BASE):POSE_3:Y")
+    field(LNK3, "$(BASE):POSE_3:Z")
+    field(LNK4, "$(BASE):POSE_3:RX")
+    field(LNK5, "$(BASE):POSE_3:RY")
+    field(LNK6, "$(BASE):POSE_3:RZ")
+}
+
+record(seq, "$(BASE):POSE_3:GO")
+{
+    field(DESC, "Enacts Pose 3 Positions")
+    field(DOL1, "$(BASE):POSE_3:X")
+    field(DOL2, "$(BASE):POSE_3:Y")
+    field(DOL3, "$(BASE):POSE_3:Z")
+    field(DOL4, "$(BASE):POSE_3:RX")
+    field(DOL5, "$(BASE):POSE_3:RY")
+    field(DOL6, "$(BASE):POSE_3:RZ")
+    field(DO7,  "1")
+    field(LNK1, "$(BASE):CMD:X")
+    field(LNK2, "$(BASE):CMD:Y")
+    field(LNK3, "$(BASE):CMD:Z")
+    field(LNK4, "$(BASE):CMD:RX")
+    field(LNK5, "$(BASE):CMD:RY")
+    field(LNK6, "$(BASE):CMD:RZ")
+    field(LNK7, "$(BASE):CMD:MOVE")
+}
+
+# Pose 4:
+record(stringout, "$(BASE):POSE_4:NAME")
+{
+    field(DTYP, "Soft Channel")
+    field(DESC, "Pose 4 name input")
+    field(FLNK, "$(BASE):POSE_4:NAME_RBV")
+}
+
+record(stringin, "$(BASE):POSE_4:NAME_RBV")
+{
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(BASE):POSE_4:NAME")
+    field(DESC, "Pose 4 name readback")
+}
+
+record(ai, "$(BASE):POSE_4:X")
+{
+    field(DESC, "Pose 4 X Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):X")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_4:Y")
+{
+    field(DESC, "Pose 4 Y Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Y")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_4:Z")
+{
+    field(DESC, "Pose 4 Z Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Z")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_4:RX")
+{
+    field(DESC, "Pose 4 RX Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RX")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_4:RY")
+{
+    field(DESC, "Pose 4 RY Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RY")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_4:RZ")
+{
+    field(DESC, "Pose 4 RZ Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RZ")
+    field(EGU, "mm")
+}
+
+record(fanout, "$(BASE):POSE_4:RECORD")
+{
+    field(DESC, "Fanout record for recording pose")
+    field(SELM, "All")
+    field(LNK1, "$(BASE):POSE_4:X")
+    field(LNK2, "$(BASE):POSE_4:Y")
+    field(LNK3, "$(BASE):POSE_4:Z")
+    field(LNK4, "$(BASE):POSE_4:RX")
+    field(LNK5, "$(BASE):POSE_4:RY")
+    field(LNK6, "$(BASE):POSE_4:RZ")
+}
+
+record(seq, "$(BASE):POSE_4:GO")
+{
+    field(DESC, "Enacts Pose 4 Positions")
+    field(DOL1, "$(BASE):POSE_4:X")
+    field(DOL2, "$(BASE):POSE_4:Y")
+    field(DOL3, "$(BASE):POSE_4:Z")
+    field(DOL4, "$(BASE):POSE_4:RX")
+    field(DOL5, "$(BASE):POSE_4:RY")
+    field(DOL6, "$(BASE):POSE_4:RZ")
+    field(DO7,  "1")
+    field(LNK1, "$(BASE):CMD:X")
+    field(LNK2, "$(BASE):CMD:Y")
+    field(LNK3, "$(BASE):CMD:Z")
+    field(LNK4, "$(BASE):CMD:RX")
+    field(LNK5, "$(BASE):CMD:RY")
+    field(LNK6, "$(BASE):CMD:RZ")
+    field(LNK7, "$(BASE):CMD:MOVE")
+}
+
+# Pose 5:
+record(stringout, "$(BASE):POSE_5:NAME")
+{
+    field(DTYP, "Soft Channel")
+    field(DESC, "Pose 5 name input")
+    field(FLNK, "$(BASE):POSE_5:NAME_RBV")
+}
+
+record(stringin, "$(BASE):POSE_5:NAME_RBV")
+{
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(BASE):POSE_5:NAME")
+    field(DESC, "Pose 5 name readback")
+}
+
+record(ai, "$(BASE):POSE_5:X")
+{
+    field(DESC, "Pose 5 X Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):X")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_5:Y")
+{
+    field(DESC, "Pose 5 Y Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Y")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_5:Z")
+{
+    field(DESC, "Pose 5 Z Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):Z")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_5:RX")
+{
+    field(DESC, "Pose 5 RX Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RX")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_5:RY")
+{
+    field(DESC, "Pose 5 RY Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RY")
+    field(EGU, "mm")
+}
+
+record(ai, "$(BASE):POSE_5:RZ")
+{
+    field(DESC, "Pose 5 RZ Position Data")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "Passive")
+    field(INP,  "$(BASE):RZ")
+    field(EGU, "mm")
+}
+
+record(fanout, "$(BASE):POSE_5:RECORD")
+{
+    field(DESC, "Fanout record for recording pose")
+    field(SELM, "All")
+    field(LNK1, "$(BASE):POSE_5:X")
+    field(LNK2, "$(BASE):POSE_5:Y")
+    field(LNK3, "$(BASE):POSE_5:Z")
+    field(LNK4, "$(BASE):POSE_5:RX")
+    field(LNK5, "$(BASE):POSE_5:RY")
+    field(LNK6, "$(BASE):POSE_5:RZ")
+}
+
+record(seq, "$(BASE):POSE_5:GO")
+{
+    field(DESC, "Enacts Pose 5 Positions")
+    field(DOL1, "$(BASE):POSE_5:X")
+    field(DOL2, "$(BASE):POSE_5:Y")
+    field(DOL3, "$(BASE):POSE_5:Z")
+    field(DOL4, "$(BASE):POSE_5:RX")
+    field(DOL5, "$(BASE):POSE_5:RY")
+    field(DOL6, "$(BASE):POSE_5:RZ")
+    field(DO7,  "1")
+    field(LNK1, "$(BASE):CMD:X")
+    field(LNK2, "$(BASE):CMD:Y")
+    field(LNK3, "$(BASE):CMD:Z")
+    field(LNK4, "$(BASE):CMD:RX")
+    field(LNK5, "$(BASE):CMD:RY")
+    field(LNK6, "$(BASE):CMD:RZ")
+    field(LNK7, "$(BASE):CMD:MOVE")
+}
+ 
